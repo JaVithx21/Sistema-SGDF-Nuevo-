@@ -428,17 +428,20 @@ export function AdministracionClient({ proveedores, usuarios }: AdminClientProps
             {/* ═══════════════ MODALS ═══════════════ */}
 
             {/* Proveedor Modal (Create / Edit) */}
-            <ProveedorModal
-                isOpen={showProveedorModal}
-                onClose={handleCloseProveedorModal}
-                proveedor={editingProveedor}
-                onSubmit={async (data) => {
-                    if (editingProveedor) {
-                        return actualizarProveedor(editingProveedor.id, data);
-                    }
-                    return crearProveedor(data);
-                }}
-            />
+            {showProveedorModal && (
+                <ProveedorModal
+                    key={editingProveedor ? editingProveedor.id : 'new'}
+                    isOpen={showProveedorModal}
+                    onClose={handleCloseProveedorModal}
+                    proveedor={editingProveedor}
+                    onSubmit={async (data) => {
+                        if (editingProveedor) {
+                            return actualizarProveedor(editingProveedor.id, data);
+                        }
+                        return crearProveedor(data);
+                    }}
+                />
+            )}
 
             {/* Confirm Deactivate Proveedor */}
             <ConfirmDeleteModal

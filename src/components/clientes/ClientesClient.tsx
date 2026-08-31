@@ -432,30 +432,33 @@ export function ClientesClient({ clientes }: ClientesClientProps) {
             {/* ═══════════════ MODALS ═══════════════ */}
 
             {/* Cliente Modal (Create / Edit) */}
-            <ClienteModal
-                isOpen={showClienteModal}
-                onClose={handleCloseModal}
-                cliente={
-                    editingCliente
-                        ? {
-                            id: editingCliente.id,
-                            razon_social: editingCliente.razon_social,
-                            rut: editingCliente.rut,
-                            nombre_contacto: editingCliente.nombre_contacto,
-                            telefono: editingCliente.telefono,
-                            email: editingCliente.email,
-                            direccion: editingCliente.direccion,
-                            activo: editingCliente.activo,
-                        }
-                        : null
-                }
-                onSubmit={async (data) => {
-                    if (editingCliente) {
-                        return actualizarCliente(editingCliente.id, data);
+            {showClienteModal && (
+                <ClienteModal
+                    key={editingCliente ? editingCliente.id : 'new'}
+                    isOpen={showClienteModal}
+                    onClose={handleCloseModal}
+                    cliente={
+                        editingCliente
+                            ? {
+                                id: editingCliente.id,
+                                razon_social: editingCliente.razon_social,
+                                rut: editingCliente.rut,
+                                nombre_contacto: editingCliente.nombre_contacto,
+                                telefono: editingCliente.telefono,
+                                email: editingCliente.email,
+                                direccion: editingCliente.direccion,
+                                activo: editingCliente.activo,
+                            }
+                            : null
                     }
-                    return crearCliente(data);
-                }}
-            />
+                    onSubmit={async (data) => {
+                        if (editingCliente) {
+                            return actualizarCliente(editingCliente.id, data);
+                        }
+                        return crearCliente(data);
+                    }}
+                />
+            )}
 
             {/* Confirm Deactivate */}
             <ConfirmDeleteModal
