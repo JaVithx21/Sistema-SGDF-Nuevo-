@@ -1,7 +1,7 @@
-﻿'use client';
+'use client';
 
 import { useState, useTransition } from 'react';
-import { X, Building2, User, Phone, Mail, MapPin, CreditCard } from 'lucide-react';
+import { X, Building2, User, Phone, Mail, MapPin, CreditCard, Clock } from 'lucide-react';
 
 interface ClienteModalProps {
     isOpen: boolean;
@@ -15,6 +15,8 @@ interface ClienteModalProps {
         email: string | null;
         direccion: string | null;
         activo: boolean;
+        ventana_inicio?: string | null;
+        ventana_fin?: string | null;
     } | null;
     onSubmit: (data: {
         razon_social: string;
@@ -24,6 +26,8 @@ interface ClienteModalProps {
         email?: string;
         direccion?: string;
         activo: boolean;
+        ventana_inicio?: string | null;
+        ventana_fin?: string | null;
     }) => Promise<{ success: boolean; error?: string }>;
 }
 
@@ -39,12 +43,26 @@ export function ClienteModal({ isOpen, onClose, cliente, onSubmit }: ClienteModa
     const [email, setEmail] = useState(cliente?.email ?? '');
     const [direccion, setDireccion] = useState(cliente?.direccion ?? '');
     const [activo, setActivo] = useState(cliente?.activo ?? true);
+    // Los <input type="time"> trabajan con "HH:MM"; la BD guarda "HH:MM:SS".
+    const [ventanaInicio, setVentanaInicio] = useState(cliente?.ventana_inicio?.slice(0, 5) ?? '');
+    const [ventanaFin, setVentanaFin] = useState(cliente?.ventana_fin?.slice(0, 5) ?? '');
 
     if (!isOpen) return null;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+
+        // La ventana horaria es opcional, pero si se define debe estar completa
+        // y ser coherente (mismo criterio que la constraint en BD).
+        if (Boolean(ventanaInicio) !== Boolean(ventanaFin)) {
+            setError('Para definir un horario de recepción debes completar ambas horas.');
+            return;
+        }
+        if (ventanaInicio && ventanaFin && ventanaInicio >= ventanaFin) {
+            setError('La hora de inicio debe ser anterior a la hora de término.');
+            return;
+        }
 
         startTransition(async () => {
             const result = await onSubmit({
@@ -55,6 +73,8 @@ export function ClienteModal({ isOpen, onClose, cliente, onSubmit }: ClienteModa
                 email: email || undefined,
                 direccion: direccion || undefined,
                 activo,
+                ventana_inicio: ventanaInicio || null,
+                ventana_fin: ventanaFin || null,
             });
 
             if (result.success) {
@@ -192,6 +212,38 @@ export function ClienteModal({ isOpen, onClose, cliente, onSubmit }: ClienteModa
                                 className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[#005088] focus:border-transparent outline-none transition-all"
                             />
                         </div>
+                    </div>
+
+                    {/* Ventana horaria de recepción (VRPTW) */}
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                            Horario de Recepción
+                        </label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="relative">
+                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                <input
+                                    type="time"
+                                    value={ventanaInicio}
+                                    onChange={(e) => setVentanaInicio(e.target.value)}
+                                    aria-label="Horario desde"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[#005088] focus:border-transparent outline-none transition-all"
+                                />
+                            </div>
+                            <div className="relative">
+                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                <input
+                                    type="time"
+                                    value={ventanaFin}
+                                    onChange={(e) => setVentanaFin(e.target.value)}
+                                    aria-label="Horario hasta"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[#005088] focus:border-transparent outline-none transition-all"
+                                />
+                            </div>
+                        </div>
+                        <p className="text-[11px] text-slate-500 font-medium mt-1.5">
+                            Opcional. Si se define, el planificador ordenará la ruta respetando este horario.
+                        </p>
                     </div>
 
                     {/* Estado */}
