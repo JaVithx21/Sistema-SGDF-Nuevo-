@@ -2,7 +2,7 @@ import 'server-only';
 
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
-import type { UserRole } from '@/constants/roles';
+import { isUserRole, type UserRole } from '@/constants/roles';
 import type { User } from '@supabase/supabase-js';
 
 // ─── Tipos ──────────────────────────────────────────────────────────────────
@@ -20,18 +20,20 @@ interface AuthFailure {
 type AuthResult = AuthSuccess | AuthFailure;
 
 // ─── Jerarquía de Roles ─────────────────────────────────────────────────────
-// admin (3) > gerente (2) > vendedor (1)
+// admin (5) > gerente (4) > jefe_operaciones (3) > vendedor (2) > chofer (1)
 
 const ROLE_HIERARCHY: Record<UserRole, number> = {
-    admin: 3,
-    gerente: 2,
-    vendedor: 1,
+    admin: 5,
+    gerente: 4,
+    jefe_operaciones: 3,
+    vendedor: 2,
+    chofer: 1,
 };
 
 // ─── Guard Principal ────────────────────────────────────────────────────────
-// Verifica autenticación y opcionalmente autorización por rol mínimo.
-// Uso:
-//   const { user, error } = await requireAuth();          // Solo auth
+// Verifica autenticación, que el rol exista en la fuente única y, opcionalmente,
+// un rol mínimo. Uso:
+//   const { user, error } = await requireAuth();          // Auth + rol válido
 //   const { user, error } = await requireAuth('gerente'); // Auth + rol mínimo
 //   const { user, error } = await requireAuth('admin');   // Solo admin
 
@@ -47,12 +49,7 @@ export async function requireAuth(minimumRole?: UserRole): Promise<AuthResult> {
         return { user: null, error: 'No autenticado. Inicie sesión para continuar.' };
     }
 
-    // Si no se pide rol mínimo, con estar autenticado basta
-    if (!minimumRole) {
-        return { user, error: null };
-    }
-
-    // Verificar rol del usuario
+    // Verificar rol del usuario (siempre, aunque no se pida rol mínimo)
     let { data: perfil } = await supabase
         .from('usuarios')
         .select('rol')
@@ -76,8 +73,21 @@ export async function requireAuth(minimumRole?: UserRole): Promise<AuthResult> {
         };
     }
 
-    const userRole = perfil.rol as UserRole;
-    const userLevel = ROLE_HIERARCHY[userRole];
+    // Fail-closed: un rol que no está en la fuente única no tiene nivel, y
+    // `undefined < n` es false, lo que concedería el acceso. Se deniega antes.
+    if (!isUserRole(perfil.rol)) {
+        return {
+            user: null,
+            error: 'Su cuenta tiene un rol no reconocido. Contacte al administrador.',
+        };
+    }
+
+    // Sin rol mínimo, basta con estar autenticado y tener un rol válido
+    if (!minimumRole) {
+        return { user, error: null };
+    }
+
+    const userLevel = ROLE_HIERARCHY[perfil.rol];
     const requiredLevel = ROLE_HIERARCHY[minimumRole];
 
     if (userLevel < requiredLevel) {
