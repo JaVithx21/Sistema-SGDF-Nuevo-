@@ -24,18 +24,34 @@ export interface SidebarItem {
 }
 
 export const SIDEBAR_ITEMS: SidebarItem[] = [
-    { key: 'dashboard', label: 'Panel de Control', href: '/dashboard', icon: 'LayoutDashboard', roles: ['admin', 'gerente', 'vendedor'] },
-    { key: 'inventario', label: 'Inventario', href: '/inventario', icon: 'Package', roles: ['admin', 'gerente', 'vendedor'] },
+    { key: 'dashboard', label: 'Panel de Control', href: '/dashboard', icon: 'LayoutDashboard', roles: ['admin', 'gerente', 'jefe_operaciones', 'vendedor'] },
+    { key: 'inventario', label: 'Inventario', href: '/inventario', icon: 'Package', roles: ['admin', 'gerente', 'jefe_operaciones', 'vendedor'] },
     { key: 'movimientos', label: 'Movimientos', href: '/movimientos', icon: 'ArrowLeftRight', roles: ['admin', 'gerente', 'vendedor'] },
-    { key: 'clientes', label: 'Clientes', href: '/clientes', icon: 'Users', roles: ['admin', 'gerente', 'vendedor'] },
-    { key: 'pedidos', label: 'Pedidos', href: '/pedidos', icon: 'ShoppingCart', roles: ['admin', 'gerente', 'vendedor'] },
+    { key: 'clientes', label: 'Clientes', href: '/clientes', icon: 'Users', roles: ['admin', 'gerente', 'jefe_operaciones', 'vendedor'] },
+    { key: 'pedidos', label: 'Pedidos', href: '/pedidos', icon: 'ShoppingCart', roles: ['admin', 'gerente', 'jefe_operaciones', 'vendedor'] },
     { key: 'finanzas', label: 'Finanzas', href: '/finanzas', icon: 'DollarSign', roles: ['admin', 'gerente', 'vendedor'] },
     { key: 'administracion', label: 'Administración', href: '/administracion', icon: 'Settings', roles: ['admin'] },
 ];
 
-/** Rutas protegidas por rol — usadas en middleware (OWASP A01) */
+/** Pantalla de inicio de cada rol: destino tras el login y al ser rechazado en una ruta. */
+export const ROLE_HOME: Record<UserRole, string> = {
+    admin: '/dashboard',
+    gerente: '/dashboard',
+    jefe_operaciones: '/dashboard',
+    vendedor: '/dashboard',
+    chofer: '/mi-ruta',
+};
+
+/**
+ * Rutas protegidas por rol — usadas en middleware (OWASP A01).
+ * Los módulos del sidebar se protegen con los mismos roles con que se muestran,
+ * así el menú y el acceso real no pueden divergir. El chofer no aparece en
+ * ningún módulo del panel: solo puede entrar a /mi-ruta.
+ */
 export const ROLE_PROTECTED_ROUTES: { prefix: string; roles: UserRole[] }[] = [
-    { prefix: '/administracion', roles: ['admin'] },
+    ...SIDEBAR_ITEMS.map((item) => ({ prefix: item.href, roles: item.roles })),
+    { prefix: '/users', roles: ['admin'] },
+    { prefix: '/mi-ruta', roles: ['chofer'] },
 ];
 
 export const ROLE_LABELS: Record<UserRole, string> = {

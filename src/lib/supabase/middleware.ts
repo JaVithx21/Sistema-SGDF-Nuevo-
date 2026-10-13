@@ -1,5 +1,5 @@
 import { AUTH_ROUTES } from '@/constants/auth';
-import { ROLE_PROTECTED_ROUTES } from '@/constants/roles';
+import { ROLE_HOME, ROLE_PROTECTED_ROUTES, isUserRole } from '@/constants/roles';
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -86,7 +86,8 @@ export const updateSession = async (request: NextRequest) => {
             if (perfilEmail) perfil = perfilEmail;
         }
 
-        if (!perfil?.rol) {
+        // Un rol fuera de la fuente única se trata igual que no tener perfil (fail-closed)
+        if (!perfil?.rol || !isUserRole(perfil.rol)) {
             // Si el usuario ya está en /login, dejarlo ahí sin redirigir (rompe el bucle)
             if (request.nextUrl.pathname.startsWith(AUTH_ROUTES.login)) {
                 // Cerrar sesión para que no vuelva a entrar al bucle
@@ -114,22 +115,25 @@ export const updateSession = async (request: NextRequest) => {
             return NextResponse.redirect(url);
         }
 
-        // Si tiene perfil válido y está en /login, redirigir a /dashboard
+        const userRole = perfil.rol;
+
+        // Si tiene perfil válido y está en /login, llevarlo a la pantalla de inicio de su rol
         if (request.nextUrl.pathname.startsWith(AUTH_ROUTES.login)) {
             const url = request.nextUrl.clone();
-            url.pathname = AUTH_ROUTES.dashboard;
+            url.pathname = ROLE_HOME[userRole];
             return NextResponse.redirect(url);
         }
-
-        const userRole = perfil.rol;
 
         const protectedRoute = ROLE_PROTECTED_ROUTES.find((route) =>
             request.nextUrl.pathname.startsWith(route.prefix)
         );
 
+        // Sin permiso: volver a su inicio. ROLE_HOME de cada rol siempre le está
+        // permitido, así que esta redirección no puede entrar en bucle.
         if (protectedRoute && !protectedRoute.roles.includes(userRole)) {
             const url = request.nextUrl.clone();
-            url.pathname = AUTH_ROUTES.dashboard;
+            url.pathname = ROLE_HOME[userRole];
+            url.search = '';
             return NextResponse.redirect(url);
         }
     }
