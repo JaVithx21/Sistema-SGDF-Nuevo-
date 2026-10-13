@@ -9,11 +9,14 @@ import type { User } from '@supabase/supabase-js';
 
 interface AuthSuccess {
     user: User;
+    /** Rol validado contra la fuente única; útil cuando se exige un rol exacto. */
+    role: UserRole;
     error: null;
 }
 
 interface AuthFailure {
     user: null;
+    role?: undefined;
     error: string;
 }
 
@@ -84,7 +87,7 @@ export async function requireAuth(minimumRole?: UserRole): Promise<AuthResult> {
 
     // Sin rol mínimo, basta con estar autenticado y tener un rol válido
     if (!minimumRole) {
-        return { user, error: null };
+        return { user, role: perfil.rol, error: null };
     }
 
     const userLevel = ROLE_HIERARCHY[perfil.rol];
@@ -97,5 +100,5 @@ export async function requireAuth(minimumRole?: UserRole): Promise<AuthResult> {
         };
     }
 
-    return { user, error: null };
+    return { user, role: perfil.rol, error: null };
 }
