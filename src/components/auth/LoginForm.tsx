@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, AlertTriangle } from 'lucide-react';
@@ -34,15 +34,12 @@ export function LoginForm() {
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    // Leer errores de OAuth desde la URL (?error_description=...)
-    useEffect(() => {
+    // Errores de OAuth/middleware llegan en la URL (?error_description=...).
+    // Se leen como estado inicial: un efecto con setState provoca un render en cascada.
+    const [error, setError] = useState<string | null>(() => {
         const errorDesc = searchParams.get('error_description');
-        if (errorDesc) {
-            setError(decodeURIComponent(errorDesc));
-        }
-    }, [searchParams]);
+        return errorDesc ? decodeURIComponent(errorDesc) : null;
+    });
 
     // ─── Login con email/password ───────────────────────────────────────
 
