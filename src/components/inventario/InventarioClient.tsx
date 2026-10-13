@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useUserRole, canAccess } from '@/contexts/UserRoleContext';
 import {
@@ -533,6 +533,29 @@ export function InventarioClient({ productos, categorias, totalPages = 1, curren
                                     )}
                                 </tbody>
                             </table>
+                        </div>
+
+                        {/* Pagination Footer */}
+                        <div className="p-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                            <p className="text-xs text-slate-400 font-medium">
+                                Mostrando página {currentPage} de {Math.max(totalPages, 1)} ({totalRegistros} productos)
+                            </p>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage <= 1}
+                                    className="px-3 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Anterior
+                                </button>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage >= totalPages}
+                                    className="px-3 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Siguiente
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

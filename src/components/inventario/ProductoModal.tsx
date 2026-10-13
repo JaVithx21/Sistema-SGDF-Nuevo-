@@ -62,7 +62,8 @@ export function ProductoModal({ isOpen, onClose, categorias, producto, onSubmit 
     const [varasPorPaquete, setVarasPorPaquete] = useState(producto?.varas_por_paquete ?? 1);
     const [precioVenta, setPrecioVenta] = useState(producto?.precio_venta_actual ?? 0);
     const [stockMinimo, setStockMinimo] = useState(producto?.stock_minimo ?? 0);
-    const [activo, setActivo] = useState(producto?.activo ?? true);
+    // El modal no edita `activo` (se usa desactivar/reactivar); solo se conserva el valor actual.
+    const [activo] = useState(producto?.activo ?? true);
 
     // ─── Sección 1: Reglas de Empaque (SSOT desde la BD) ────────────────
     const [vieneEnCajas, setVieneEnCajas] = useState(
