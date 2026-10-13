@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/security/auth-guard';
+import { geocodificarDireccion } from '@/lib/geocoding';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
@@ -15,6 +16,25 @@ interface ClienteFormData {
     email?: string;
     direccion?: string;
     activo: boolean;
+    /** Ventana horaria de recepción "HH:MM" — null = sin restricción (VRPTW). */
+    ventana_inicio?: string | null;
+    ventana_fin?: string | null;
+}
+
+/**
+ * La ventana horaria es opcional, pero si se define debe estar completa y ser
+ * coherente. Refleja la constraint chk_clientes_ventana_valida de la BD.
+ */
+function validarVentanaHoraria(data: ClienteFormData): string | null {
+    const { ventana_inicio, ventana_fin } = data;
+    if (!ventana_inicio && !ventana_fin) return null;
+    if (!ventana_inicio || !ventana_fin) {
+        return 'Para definir un horario de recepción debes indicar hora de inicio y de término.';
+    }
+    if (ventana_inicio >= ventana_fin) {
+        return 'La hora de inicio debe ser anterior a la hora de término.';
+    }
+    return null;
 }
 
 interface ActionResult {
@@ -28,8 +48,13 @@ export async function crearCliente(data: ClienteFormData): Promise<ActionResult>
     const { error: authError } = await requireAuth();
     if (authError) return { success: false, error: authError };
 
+    const ventanaError = validarVentanaHoraria(data);
+    if (ventanaError) return { success: false, error: ventanaError };
+
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
+
+    const coords = await geocodificarDireccion(data.direccion);
 
     const { error } = await supabase
         .from('clientes')
@@ -40,6 +65,10 @@ export async function crearCliente(data: ClienteFormData): Promise<ActionResult>
             telefono: data.telefono || null,
             email: data.email || null,
             direccion: data.direccion || null,
+            lat: coords?.lat ?? null,
+            lng: coords?.lng ?? null,
+            ventana_inicio: data.ventana_inicio || null,
+            ventana_fin: data.ventana_fin || null,
             activo: data.activo,
         });
 
@@ -64,8 +93,13 @@ export async function actualizarCliente(
     const { error: authError } = await requireAuth();
     if (authError) return { success: false, error: authError };
 
+    const ventanaError = validarVentanaHoraria(data);
+    if (ventanaError) return { success: false, error: ventanaError };
+
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
+
+    const coords = await geocodificarDireccion(data.direccion);
 
     const { error } = await supabase
         .from('clientes')
@@ -76,6 +110,10 @@ export async function actualizarCliente(
             telefono: data.telefono || null,
             email: data.email || null,
             direccion: data.direccion || null,
+            lat: coords?.lat ?? null,
+            lng: coords?.lng ?? null,
+            ventana_inicio: data.ventana_inicio || null,
+            ventana_fin: data.ventana_fin || null,
             activo: data.activo,
         })
         .eq('id', id);

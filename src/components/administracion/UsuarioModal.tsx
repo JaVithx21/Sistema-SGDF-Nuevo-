@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { X, Mail, User, Shield } from 'lucide-react';
-import type { UsuarioData, RolUsuario } from './AdministracionClient';
+import type { UsuarioData } from './AdministracionClient';
 import { Button } from '@/components/ui/Button';
+import { USER_ROLES, ROLE_LABELS, type RolUsuario } from '@/constants/roles';
 
 interface UsuarioModalProps {
     isOpen: boolean;
@@ -116,9 +117,11 @@ export function UsuarioModal({ isOpen, onClose, usuario, onSubmit }: UsuarioModa
                                 className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[#005088] outline-none transition-all appearance-none"
                                 disabled={isLoading}
                             >
-                                <option value="admin">Administrador</option>
-                                <option value="gerente">Gerente</option>
-                                <option value="vendedor">Vendedor</option>
+                                {USER_ROLES.map((rol) => (
+                                    <option key={rol} value={rol}>
+                                        {ROLE_LABELS[rol]}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                     </div>
