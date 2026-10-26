@@ -13,6 +13,7 @@ import {
     Loader2,
 } from 'lucide-react';
 import { marcarParada } from '@/app/(chofer)/mi-ruta/actions';
+import { componerMotivoFallo } from '@/lib/rutas/validar-estado';
 import { MOTIVOS_FALLO, MOTIVO_MAX_LENGTH, type EstadoParada, type ParadaChoferRow } from '@/types/rutas';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -90,15 +91,12 @@ function ParadaCard({ parada, esSiguiente }: { parada: ParadaChoferRow; esSiguie
     };
 
     const confirmarFallo = () => {
-        if (!motivo) {
-            setError('Elige un motivo.');
+        const motivoFinal = componerMotivoFallo(motivo, detalle);
+        if (!motivoFinal.ok) {
+            setError(motivoFinal.error);
             return;
         }
-        if (motivo === 'Otro' && !detalle.trim()) {
-            setError('Describe el motivo.');
-            return;
-        }
-        guardar('fallido', motivo === 'Otro' ? `Otro: ${detalle.trim()}` : motivo);
+        guardar('fallido', motivoFinal.valor);
     };
 
     return (
