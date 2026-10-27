@@ -29,6 +29,7 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     { key: 'movimientos', label: 'Movimientos', href: '/movimientos', icon: 'ArrowLeftRight', roles: ['admin', 'gerente', 'vendedor'] },
     { key: 'clientes', label: 'Clientes', href: '/clientes', icon: 'Users', roles: ['admin', 'gerente', 'jefe_operaciones', 'vendedor'] },
     { key: 'pedidos', label: 'Pedidos', href: '/pedidos', icon: 'ShoppingCart', roles: ['admin', 'gerente', 'jefe_operaciones', 'vendedor'] },
+    { key: 'rutas', label: 'Rutas', href: '/rutas', icon: 'Route', roles: ['admin', 'jefe_operaciones'] },
     { key: 'finanzas', label: 'Finanzas', href: '/finanzas', icon: 'DollarSign', roles: ['admin', 'gerente', 'vendedor'] },
     { key: 'administracion', label: 'Administración', href: '/administracion', icon: 'Settings', roles: ['admin'] },
 ];

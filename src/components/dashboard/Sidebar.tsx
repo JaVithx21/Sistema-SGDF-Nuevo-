@@ -11,6 +11,7 @@ import {
     DollarSign,
     Users,
     Settings,
+    Route,
 } from 'lucide-react';
 import type { SidebarItem as SidebarItemType, UserRole } from '@/constants/roles';
 import { SIDEBAR_ITEMS, ROLE_LABELS } from '@/constants/roles';
@@ -23,6 +24,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: 
     DollarSign,
     Users,
     Settings,
+    Route,
 };
 
 interface SidebarProps {
