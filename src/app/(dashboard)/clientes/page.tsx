@@ -10,7 +10,7 @@ export default async function ClientesPage() {
     // ─── Fetch clientes con conteo de pedidos ──────────────────────────
     const { data: clientesRaw } = await supabase
         .from('clientes')
-        .select('id, razon_social, rut, nombre_contacto, telefono, email, direccion, saldo_pendiente, activo, pedidos(id)')
+        .select('id, razon_social, rut, nombre_contacto, telefono, email, direccion, lat, lng, ventana_inicio, ventana_fin, saldo_pendiente, activo, pedidos(id)')
         .order('razon_social', { ascending: true });
 
     // ─── Transformar a datos serializables (RSC boundary rule) ─────────
@@ -23,6 +23,10 @@ export default async function ClientesPage() {
         telefono: c.telefono,
         email: c.email,
         direccion: c.direccion,
+        // DEF-05: sin estos campos el editor partía vacío y borraba la ventana al guardar
+        ventana_inicio: c.ventana_inicio ?? null,
+        ventana_fin: c.ventana_fin ?? null,
+        con_ubicacion: c.lat !== null && c.lng !== null,
         saldo_pendiente: Number(c.saldo_pendiente),
         activo: c.activo,
         total_pedidos: Array.isArray(c.pedidos) ? c.pedidos.length : 0,

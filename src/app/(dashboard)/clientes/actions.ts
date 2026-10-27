@@ -99,7 +99,14 @@ export async function actualizarCliente(
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
-    const coords = await geocodificarDireccion(data.direccion);
+    // DEF-05: solo se vuelve a geocodificar si cambió la dirección. Antes se
+    // geocodificaba en cada edición y, si el servicio fallaba, se perdían
+    // coordenadas válidas. Si la dirección cambió, las coordenadas viejas ya no
+    // sirven: se reemplazan por las nuevas o quedan nulas («sin ubicación»).
+    const { data: actual } = await supabase.from('clientes').select('direccion').eq('id', id).single();
+    const nuevaDireccion = data.direccion || null;
+    const cambioDireccion = (actual?.direccion ?? null) !== nuevaDireccion;
+    const coords = cambioDireccion ? await geocodificarDireccion(nuevaDireccion) : null;
 
     const { error } = await supabase
         .from('clientes')
@@ -109,9 +116,8 @@ export async function actualizarCliente(
             nombre_contacto: data.nombre_contacto || null,
             telefono: data.telefono || null,
             email: data.email || null,
-            direccion: data.direccion || null,
-            lat: coords?.lat ?? null,
-            lng: coords?.lng ?? null,
+            direccion: nuevaDireccion,
+            ...(cambioDireccion ? { lat: coords?.lat ?? null, lng: coords?.lng ?? null } : {}),
             ventana_inicio: data.ventana_inicio || null,
             ventana_fin: data.ventana_fin || null,
             activo: data.activo,
