@@ -15,6 +15,7 @@ import {
     Phone,
     AlertCircle,
     DollarSign,
+    MapPinOff,
 } from 'lucide-react';
 import { ClienteModal } from '@/components/clientes/ClienteModal';
 import { ConfirmDeleteModal } from '@/components/inventario/ConfirmDeleteModal';
@@ -38,6 +39,10 @@ export interface ClienteData {
     telefono: string | null;
     email: string | null;
     direccion: string | null;
+    ventana_inicio: string | null;
+    ventana_fin: string | null;
+    /** false = el geocodificador no encontró la dirección (lista «sin ubicación»). */
+    con_ubicacion: boolean;
     saldo_pendiente: number;
     activo: boolean;
     total_pedidos: number;
@@ -327,6 +332,14 @@ export function ClientesClient({ clientes }: ClientesClientProps) {
                                                 <span className="text-[11px] text-slate-500 font-medium">
                                                     {cliente.rut || 'Sin RUT'}
                                                 </span>
+                                                {!cliente.con_ubicacion && (
+                                                    <span
+                                                        className="mt-1 w-fit flex items-center gap-1 text-[10px] font-bold uppercase bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded"
+                                                        title="No se pudo ubicar la dirección: no se puede incluir en una ruta hasta corregirla"
+                                                    >
+                                                        <MapPinOff size={11} /> Sin ubicación
+                                                    </span>
+                                                )}
                                             </div>
                                         </td>
 
@@ -447,6 +460,8 @@ export function ClientesClient({ clientes }: ClientesClientProps) {
                                 telefono: editingCliente.telefono,
                                 email: editingCliente.email,
                                 direccion: editingCliente.direccion,
+                                ventana_inicio: editingCliente.ventana_inicio,
+                                ventana_fin: editingCliente.ventana_fin,
                                 activo: editingCliente.activo,
                             }
                             : null
