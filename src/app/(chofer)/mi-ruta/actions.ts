@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/security/auth-guard';
-import { MOTIVO_MAX_LENGTH } from '@/types/rutas';
+import { validarMarcaParada } from '@/lib/rutas/validar-estado';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
@@ -35,28 +35,16 @@ export async function marcarParada(
     }
 
     // OWASP A03: validar en runtime — los tipos de TS no protegen una server action
-    if (!Number.isInteger(paradaId) || paradaId <= 0) {
-        return { success: false, error: 'Parada no válida.' };
-    }
-    if (estado !== 'entregado' && estado !== 'fallido') {
-        return { success: false, error: 'Estado no válido.' };
-    }
-
-    const motivoLimpio = motivo?.trim() ?? '';
-    if (estado === 'fallido' && !motivoLimpio) {
-        return { success: false, error: 'Indica el motivo por el que no se pudo entregar.' };
-    }
-    if (motivoLimpio.length > MOTIVO_MAX_LENGTH) {
-        return { success: false, error: `El motivo no puede superar ${MOTIVO_MAX_LENGTH} caracteres.` };
-    }
+    const validacion = validarMarcaParada(paradaId, estado, motivo);
+    if (!validacion.ok) return { success: false, error: validacion.error };
 
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
     const { error } = await supabase.rpc('marcar_parada', {
-        p_parada_id: paradaId,
-        p_estado: estado,
-        p_motivo: estado === 'fallido' ? motivoLimpio : null,
+        p_parada_id: validacion.valor.paradaId,
+        p_estado: validacion.valor.estado,
+        p_motivo: validacion.valor.motivo,
     });
 
     if (error) {
