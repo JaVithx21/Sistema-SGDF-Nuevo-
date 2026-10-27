@@ -467,6 +467,43 @@ export function PlanificadorRutas({ fecha, hoy, pedidos, choferes, sucursales, r
                                 })}
                             </ul>
                         )}
+
+                        {/* Detalle de la ruta seleccionada: lo que registró el chofer (SE-03, F-06) */}
+                        {rutaVista && !ruta && (
+                            <div className="mt-4 border-t border-slate-100 pt-4">
+                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                    Detalle de la ruta #{rutaVista.id}
+                                </h4>
+                                <ol className="space-y-1.5">
+                                    {rutaVista.paradas.map((p) => (
+                                        <li key={p.orden} className="flex items-start gap-3 text-sm">
+                                            <span className="w-6 h-6 shrink-0 rounded-full bg-slate-200 text-slate-700 text-xs font-black flex items-center justify-center">
+                                                {p.orden}
+                                            </span>
+                                            <span className="flex-1 min-w-0">
+                                                <span className="font-semibold text-slate-800">{p.clienteNombre}</span>
+                                                {p.estado === 'fallido' && (
+                                                    <span className="block text-xs text-rose-700">Motivo: {p.motivoFallo ?? 'sin motivo registrado'}</span>
+                                                )}
+                                            </span>
+                                            <span
+                                                className={`shrink-0 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
+                                                    p.estado === 'entregado'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                        : p.estado === 'fallido'
+                                                            ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                                            : 'bg-slate-100 text-slate-600 border-slate-200'
+                                                }`}
+                                            >
+                                                {p.estado === 'entregado' ? 'Entregado' : p.estado === 'fallido' ? 'No entregado' : 'Pendiente'}
+                                                {p.marcadaEn &&
+                                                    ` · ${new Date(p.marcadaEn).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Santiago' })}`}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ol>
+                            </div>
+                        )}
                     </section>
                 </div>
             </div>

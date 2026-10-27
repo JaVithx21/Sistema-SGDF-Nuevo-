@@ -81,6 +81,10 @@ export interface ParadaGuardada {
     lat: number | null;
     lng: number | null;
     estado: 'pendiente' | 'entregado' | 'fallido';
+    /** Motivo que registró el chofer al marcar la parada como fallida (SE-03). */
+    motivoFallo: string | null;
+    /** Momento en que el chofer marcó la parada (timestamptz ISO). */
+    marcadaEn: string | null;
 }
 
 export interface RutaGuardada {

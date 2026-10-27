@@ -51,7 +51,7 @@ export default async function RutasPage(props: {
         supabase
             .from('rutas_diarias')
             .select(
-                'id, estado, km_planificados, simulada, geojson_ruta, created_at, choferes(nombre_completo), vehiculos(patente), sucursales(nombre, lat, lng), ruta_paradas(orden, estado, pedido_id, lat_destino, lng_destino, pedidos(clientes(razon_social)))'
+                'id, estado, km_planificados, simulada, geojson_ruta, created_at, choferes(nombre_completo), vehiculos(patente), sucursales(nombre, lat, lng), ruta_paradas(orden, estado, motivo_fallo, entregado_at, pedido_id, lat_destino, lng_destino, pedidos(clientes(razon_social)))'
             )
             .eq('fecha', fecha)
             .order('created_at', { ascending: false }),
@@ -132,6 +132,8 @@ export default async function RutasPage(props: {
                 lat: aNumero(rp.lat_destino),
                 lng: aNumero(rp.lng_destino),
                 estado: ['entregado', 'fallido'].includes(rp.estado) ? rp.estado : 'pendiente',
+                motivoFallo: rp.motivo_fallo ?? null,
+                marcadaEn: rp.entregado_at ?? null,
             }))
             .sort((a, b) => a.orden - b.orden);
         return {
