@@ -30,6 +30,11 @@ describe('rutas por rol', () => {
         expect(miRuta?.roles).toEqual(['chofer']);
     });
 
+    it('solo admin y jefe de operaciones entran al planificador /rutas', () => {
+        const rutas = ROLE_PROTECTED_ROUTES.find((r) => r.prefix === '/rutas');
+        expect(rutas?.roles).toEqual(['admin', 'jefe_operaciones']);
+    });
+
     it('el chofer no aparece en ningún módulo del panel', () => {
         const panel = ROLE_PROTECTED_ROUTES.filter((r) => r.prefix !== '/mi-ruta');
         for (const ruta of panel) expect(ruta.roles).not.toContain('chofer');
