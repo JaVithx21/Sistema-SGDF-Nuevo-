@@ -15,6 +15,13 @@ import 'server-only';
 const ORS_GEOCODE_URL = 'https://api.openrouteservice.org/geocode/search';
 const TIMEOUT_MS = 5000;
 
+/**
+ * DEF-08: sin límite, una dirección ambigua (p. ej. "Plaza de Armas, Peralillo,
+ * O'Higgins") se ubicaba en otra región, a ~150 km. La distribuidora opera en la
+ * Región de O'Higgins: se busca solo dentro de este rectángulo.
+ */
+export const ZONA_OPERACION = { minLat: -35.1, maxLat: -33.8, minLng: -72.1, maxLng: -70.3 } as const;
+
 export interface Coordenadas {
     lat: number;
     lng: number;
@@ -39,6 +46,10 @@ export async function geocodificarDireccion(direccion?: string | null): Promise<
     const params = new URLSearchParams({
         text: texto,
         'boundary.country': 'CL',
+        'boundary.rect.min_lat': String(ZONA_OPERACION.minLat),
+        'boundary.rect.max_lat': String(ZONA_OPERACION.maxLat),
+        'boundary.rect.min_lon': String(ZONA_OPERACION.minLng),
+        'boundary.rect.max_lon': String(ZONA_OPERACION.maxLng),
         size: '1',
     });
 
