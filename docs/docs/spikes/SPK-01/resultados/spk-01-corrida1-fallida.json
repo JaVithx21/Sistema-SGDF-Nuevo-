@@ -1,0 +1,486 @@
+{
+  "spike": "SPK-01",
+  "fecha": "2026-10-27T00:53:51.992Z",
+  "fechaChile": "26-10-2026, 9:53:51 p. m.",
+  "node": "v24.12.0",
+  "plataforma": "win32 x64",
+  "red": "NO VERIFICADO (conexión del PC de Javier; indicar casa o universidad)",
+  "endpoint": "https://api.openrouteservice.org/optimization",
+  "perfil": "driving-car",
+  "options": {
+    "g": true
+  },
+  "metodo": {
+    "repeticiones": 5,
+    "esperaEntreLlamadasMs": 4000,
+    "topeMedicionMs": 30000,
+    "reintentos": 0,
+    "semilla": 20261026,
+    "latenciaOrs": "desde antes del fetch hasta leer el cuerpo completo",
+    "respaldo": "implementación de la guía de Martín (no está en el repositorio)"
+  },
+  "vehiculo": {
+    "capacidadDm3": 13000,
+    "capacidadKg": 1289,
+    "turno": "07:00–18:00",
+    "deposito": {
+      "nombre": "Peralillo",
+      "lat": -34.4797,
+      "lng": -71.4925
+    }
+  },
+  "conjuntos": {
+    "10": {
+      "ocupacionObjetivoPct": 84.2,
+      "volumenTotalDm3": 10935,
+      "conVentana": 3
+    },
+    "25": {
+      "ocupacionObjetivoPct": 60.6,
+      "volumenTotalDm3": 7864,
+      "conVentana": 7
+    },
+    "50": {
+      "ocupacionObjetivoPct": 76.1,
+      "volumenTotalDm3": 9862,
+      "conVentana": 10
+    }
+  },
+  "llamadasOrs": 15,
+  "cuotaObservadaEnCabeceras": {
+    "limite": "50",
+    "restante": "35",
+    "reset": "1793148771"
+  },
+  "detenidoPor429": false,
+  "resumen": [
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "ejecuciones": 5,
+      "exitosas": 0,
+      "medianaMs": null,
+      "minMs": null,
+      "maxMs": null,
+      "httpCodigos": [
+        500
+      ],
+      "siempreTraeDistancia": null,
+      "siempreTraeGeometria": null,
+      "asignadas": []
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "ejecuciones": 5,
+      "exitosas": 5,
+      "medianaMs": 0.0694,
+      "minMs": 0.0343,
+      "maxMs": 0.3822,
+      "httpCodigos": [
+        null
+      ],
+      "siempreTraeDistancia": true,
+      "siempreTraeGeometria": false,
+      "asignadas": [
+        "10/10"
+      ]
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "ejecuciones": 5,
+      "exitosas": 0,
+      "medianaMs": null,
+      "minMs": null,
+      "maxMs": null,
+      "httpCodigos": [
+        500
+      ],
+      "siempreTraeDistancia": null,
+      "siempreTraeGeometria": null,
+      "asignadas": []
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "ejecuciones": 5,
+      "exitosas": 5,
+      "medianaMs": 0.114,
+      "minMs": 0.0371,
+      "maxMs": 0.2032,
+      "httpCodigos": [
+        null
+      ],
+      "siempreTraeDistancia": true,
+      "siempreTraeGeometria": false,
+      "asignadas": [
+        "25/25"
+      ]
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "ejecuciones": 5,
+      "exitosas": 0,
+      "medianaMs": null,
+      "minMs": null,
+      "maxMs": null,
+      "httpCodigos": [
+        500
+      ],
+      "siempreTraeDistancia": null,
+      "siempreTraeGeometria": null,
+      "asignadas": []
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "ejecuciones": 5,
+      "exitosas": 5,
+      "medianaMs": 0.1473,
+      "minMs": 0.12,
+      "maxMs": 0.582,
+      "httpCodigos": [
+        null
+      ],
+      "siempreTraeDistancia": true,
+      "siempreTraeGeometria": false,
+      "asignadas": [
+        "50/50"
+      ]
+    }
+  ],
+  "ejecuciones": [
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "repeticion": 1,
+      "inicio": "2026-10-27T00:52:50.156Z",
+      "ms": 1033.9,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 3: -71.2135900 -34.6680180."
+    },
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "repeticion": 2,
+      "inicio": "2026-10-27T00:52:55.199Z",
+      "ms": 287,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 3: -71.2135900 -34.6680180."
+    },
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "repeticion": 3,
+      "inicio": "2026-10-27T00:52:59.488Z",
+      "ms": 285.3,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 3: -71.2135900 -34.6680180."
+    },
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "repeticion": 4,
+      "inicio": "2026-10-27T00:53:03.780Z",
+      "ms": 287.8,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 3: -71.2135900 -34.6680180."
+    },
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "repeticion": 5,
+      "inicio": "2026-10-27T00:53:08.080Z",
+      "ms": 312.3,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 3: -71.2135900 -34.6680180."
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 1,
+      "ms": 0.3822,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 153099
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 2,
+      "ms": 0.0738,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 153099
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 3,
+      "ms": 0.0694,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 153099
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 4,
+      "ms": 0.0343,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 153099
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 5,
+      "ms": 0.0485,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 153099
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "repeticion": 1,
+      "inicio": "2026-10-27T00:53:12.393Z",
+      "ms": 312.1,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 5: -71.2130540 -34.6700790."
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "repeticion": 2,
+      "inicio": "2026-10-27T00:53:16.723Z",
+      "ms": 331.6,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 5: -71.2130540 -34.6700790."
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "repeticion": 3,
+      "inicio": "2026-10-27T00:53:21.060Z",
+      "ms": 339.8,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 5: -71.2130540 -34.6700790."
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "repeticion": 4,
+      "inicio": "2026-10-27T00:53:25.414Z",
+      "ms": 307.9,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 5: -71.2130540 -34.6700790."
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "repeticion": 5,
+      "inicio": "2026-10-27T00:53:29.725Z",
+      "ms": 301.7,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 5: -71.2130540 -34.6700790."
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 1,
+      "ms": 0.2032,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 161224
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 2,
+      "ms": 0.1773,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 161224
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 3,
+      "ms": 0.114,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 161224
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 4,
+      "ms": 0.0371,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 161224
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 5,
+      "ms": 0.0392,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 161224
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "repeticion": 1,
+      "inicio": "2026-10-27T00:53:34.027Z",
+      "ms": 395.3,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 12: -71.2180550 -34.6689820."
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "repeticion": 2,
+      "inicio": "2026-10-27T00:53:38.431Z",
+      "ms": 373.4,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 12: -71.2180550 -34.6689820."
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "repeticion": 3,
+      "inicio": "2026-10-27T00:53:42.816Z",
+      "ms": 406,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 12: -71.2180550 -34.6689820."
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "repeticion": 4,
+      "inicio": "2026-10-27T00:53:47.228Z",
+      "ms": 363,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 12: -71.2180550 -34.6689820."
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "repeticion": 5,
+      "inicio": "2026-10-27T00:53:51.593Z",
+      "ms": 396.8,
+      "http": 500,
+      "error": "Could not find routable point within a radius of 350.0 meters of specified coordinate 12: -71.2180550 -34.6689820."
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 1,
+      "ms": 0.1473,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 163549
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 2,
+      "ms": 0.1475,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 163549
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 3,
+      "ms": 0.1233,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 163549
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 4,
+      "ms": 0.582,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 163549
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 5,
+      "ms": 0.12,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 163549
+    }
+  ]
+}

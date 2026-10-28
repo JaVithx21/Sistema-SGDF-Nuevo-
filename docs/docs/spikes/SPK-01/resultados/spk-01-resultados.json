@@ -1,0 +1,604 @@
+{
+  "spike": "SPK-01",
+  "fecha": "2026-10-27T00:56:14.249Z",
+  "fechaChile": "26-10-2026, 9:56:14 p. m.",
+  "node": "v24.12.0",
+  "plataforma": "win32 x64",
+  "red": "NO VERIFICADO (conexión del PC de Javier; indicar casa o universidad)",
+  "endpoint": "https://api.openrouteservice.org/optimization",
+  "perfil": "driving-car",
+  "options": {
+    "g": true
+  },
+  "metodo": {
+    "repeticiones": 5,
+    "esperaEntreLlamadasMs": 4000,
+    "topeMedicionMs": 30000,
+    "reintentos": 0,
+    "semilla": 20261026,
+    "latenciaOrs": "desde antes del fetch hasta leer el cuerpo completo",
+    "respaldo": "implementación de la guía de Martín (no está en el repositorio)"
+  },
+  "vehiculo": {
+    "capacidadDm3": 13000,
+    "capacidadKg": 1289,
+    "turno": "07:00–18:00",
+    "deposito": {
+      "nombre": "Peralillo",
+      "lat": -34.4797,
+      "lng": -71.4925
+    }
+  },
+  "conjuntos": {
+    "10": {
+      "ocupacionObjetivoPct": 84.2,
+      "volumenTotalDm3": 10935,
+      "conVentana": 3
+    },
+    "25": {
+      "ocupacionObjetivoPct": 60.6,
+      "volumenTotalDm3": 7864,
+      "conVentana": 7
+    },
+    "50": {
+      "ocupacionObjetivoPct": 76.1,
+      "volumenTotalDm3": 9862,
+      "conVentana": 10
+    }
+  },
+  "llamadasOrs": 15,
+  "llamadasSnap": 3,
+  "ajusteSnap": {
+    "10": {
+      "http": 200,
+      "sinCalleCercana": 0,
+      "distanciaAjusteMaxM": 194,
+      "paradasFinales": 10
+    },
+    "25": {
+      "http": 200,
+      "sinCalleCercana": 0,
+      "distanciaAjusteMaxM": 529,
+      "paradasFinales": 25
+    },
+    "50": {
+      "http": 200,
+      "sinCalleCercana": 0,
+      "distanciaAjusteMaxM": 695,
+      "paradasFinales": 50
+    }
+  },
+  "cuotaObservadaEnCabeceras": {
+    "limite": "50",
+    "restante": "19",
+    "reset": "1793148771"
+  },
+  "detenidoPor429": false,
+  "corridaAnterior": "spk-01-corrida1-fallida.json (15 llamadas, todas HTTP 500: punto no ruteable a > 350 m de una calle) + 1 llamada de validación (HTTP 500)",
+  "resumen": [
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "ejecuciones": 5,
+      "exitosas": 5,
+      "medianaMs": 610.4,
+      "minMs": 536.4,
+      "maxMs": 1536.9,
+      "httpCodigos": [
+        200
+      ],
+      "siempreTraeDistancia": true,
+      "siempreTraeGeometria": true,
+      "asignadas": [
+        "10/10"
+      ]
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "ejecuciones": 5,
+      "exitosas": 5,
+      "medianaMs": 0.0955,
+      "minMs": 0.0253,
+      "maxMs": 0.33,
+      "httpCodigos": [
+        null
+      ],
+      "siempreTraeDistancia": true,
+      "siempreTraeGeometria": false,
+      "asignadas": [
+        "10/10"
+      ]
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "ejecuciones": 5,
+      "exitosas": 5,
+      "medianaMs": 1019.5,
+      "minMs": 762.2,
+      "maxMs": 1052.4,
+      "httpCodigos": [
+        200
+      ],
+      "siempreTraeDistancia": true,
+      "siempreTraeGeometria": true,
+      "asignadas": [
+        "25/25"
+      ]
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "ejecuciones": 5,
+      "exitosas": 5,
+      "medianaMs": 0.05,
+      "minMs": 0.0346,
+      "maxMs": 0.7193,
+      "httpCodigos": [
+        null
+      ],
+      "siempreTraeDistancia": true,
+      "siempreTraeGeometria": false,
+      "asignadas": [
+        "25/25"
+      ]
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "ejecuciones": 5,
+      "exitosas": 5,
+      "medianaMs": 1530.6,
+      "minMs": 1169.2,
+      "maxMs": 2688.7,
+      "httpCodigos": [
+        200
+      ],
+      "siempreTraeDistancia": true,
+      "siempreTraeGeometria": true,
+      "asignadas": [
+        "50/50"
+      ]
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "ejecuciones": 5,
+      "exitosas": 5,
+      "medianaMs": 0.1556,
+      "minMs": 0.1205,
+      "maxMs": 0.5221,
+      "httpCodigos": [
+        null
+      ],
+      "siempreTraeDistancia": true,
+      "siempreTraeGeometria": false,
+      "asignadas": [
+        "50/50"
+      ]
+    }
+  ],
+  "ejecuciones": [
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "repeticion": 1,
+      "inicio": "2026-10-27T00:55:00.916Z",
+      "ms": 610.4,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 121635,
+      "traeGeometria": true,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 12424
+    },
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "repeticion": 2,
+      "inicio": "2026-10-27T00:55:05.532Z",
+      "ms": 821.6,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 121635,
+      "traeGeometria": true,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 12424
+    },
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "repeticion": 3,
+      "inicio": "2026-10-27T00:55:10.356Z",
+      "ms": 536.4,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 121635,
+      "traeGeometria": true,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 12424
+    },
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "repeticion": 4,
+      "inicio": "2026-10-27T00:55:14.895Z",
+      "ms": 1536.9,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 121635,
+      "traeGeometria": true,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 12424
+    },
+    {
+      "tamano": 10,
+      "alternativa": "ors_optimization",
+      "repeticion": 5,
+      "inicio": "2026-10-27T00:55:20.448Z",
+      "ms": 546.6,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 121635,
+      "traeGeometria": true,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 12424
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 1,
+      "ms": 0.33,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 116069
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 2,
+      "ms": 0.1726,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 116069
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 3,
+      "ms": 0.0955,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 116069
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 4,
+      "ms": 0.05,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 116069
+    },
+    {
+      "tamano": 10,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 5,
+      "ms": 0.0253,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 10,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 116069
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "repeticion": 1,
+      "inicio": "2026-10-27T00:55:25.008Z",
+      "ms": 1052.4,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 125003,
+      "traeGeometria": true,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 21743
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "repeticion": 2,
+      "inicio": "2026-10-27T00:55:30.064Z",
+      "ms": 762.2,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 125003,
+      "traeGeometria": true,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 21743
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "repeticion": 3,
+      "inicio": "2026-10-27T00:55:34.831Z",
+      "ms": 825.2,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 125003,
+      "traeGeometria": true,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 21743
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "repeticion": 4,
+      "inicio": "2026-10-27T00:55:39.662Z",
+      "ms": 1019.5,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 125003,
+      "traeGeometria": true,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 21743
+    },
+    {
+      "tamano": 25,
+      "alternativa": "ors_optimization",
+      "repeticion": 5,
+      "inicio": "2026-10-27T00:55:44.686Z",
+      "ms": 1021.1,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 125003,
+      "traeGeometria": true,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 21743
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 1,
+      "ms": 0.1845,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 120501
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 2,
+      "ms": 0.7193,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 120501
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 3,
+      "ms": 0.05,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 120501
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 4,
+      "ms": 0.0347,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 120501
+    },
+    {
+      "tamano": 25,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 5,
+      "ms": 0.0346,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 25,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 120501
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "repeticion": 1,
+      "inicio": "2026-10-27T00:55:49.717Z",
+      "ms": 1790.1,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 176675,
+      "traeGeometria": true,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 34087
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "repeticion": 2,
+      "inicio": "2026-10-27T00:55:55.518Z",
+      "ms": 1324.1,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 176675,
+      "traeGeometria": true,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 34087
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "repeticion": 3,
+      "inicio": "2026-10-27T00:56:00.856Z",
+      "ms": 1169.2,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 176675,
+      "traeGeometria": true,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 34087
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "repeticion": 4,
+      "inicio": "2026-10-27T00:56:06.026Z",
+      "ms": 1530.6,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 176675,
+      "traeGeometria": true,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 34087
+    },
+    {
+      "tamano": 50,
+      "alternativa": "ors_optimization",
+      "repeticion": 5,
+      "inicio": "2026-10-27T00:56:11.558Z",
+      "ms": 2688.7,
+      "http": 200,
+      "codigoVroom": 0,
+      "traeDistancia": true,
+      "distanciaM": 176675,
+      "traeGeometria": true,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "duracionRutaSeg": 34087
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 1,
+      "ms": 0.1735,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 124143
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 2,
+      "ms": 0.1209,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 124143
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 3,
+      "ms": 0.1205,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 124143
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 4,
+      "ms": 0.1556,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 124143
+    },
+    {
+      "tamano": 50,
+      "alternativa": "respaldo_local_nn",
+      "repeticion": 5,
+      "ms": 0.5221,
+      "http": null,
+      "traeDistancia": true,
+      "traeGeometria": false,
+      "paradasAsignadas": 50,
+      "sinAsignar": 0,
+      "simulada": true,
+      "distanciaM": 124143
+    }
+  ]
+}

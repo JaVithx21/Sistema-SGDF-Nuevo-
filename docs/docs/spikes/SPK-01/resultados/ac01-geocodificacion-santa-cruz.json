@@ -1,0 +1,73 @@
+{
+  "fecha": "2026-10-27T20:40:49.475Z",
+  "resultados": [
+    {
+      "direccion": "Av. Errázuriz 1137, Santa Cruz, O'Higgins",
+      "actual": {
+        "lat": -34.627521,
+        "lng": -71.347149
+      },
+      "actual_km_a_SantaCruz": 2.1,
+      "actual_ms": 1061,
+      "conRegion": {
+        "lat": -34.627521,
+        "lng": -71.347149
+      },
+      "conRegion_km_a_SantaCruz": 2.1,
+      "conRegion_label": "Avenida Errázuriz, Santa Cruz, LI, Chile",
+      "conRegion_capa": "street",
+      "conRegion_confianza": 1
+    },
+    {
+      "direccion": "C. La Paz 144, 3130672 Colchagua, Santa Cruz, O'Higgins",
+      "actual": {
+        "lat": -34.632492,
+        "lng": -71.355155
+      },
+      "actual_km_a_SantaCruz": 1.2,
+      "actual_ms": 4345,
+      "conRegion": {
+        "lat": -34.632492,
+        "lng": -71.355155
+      },
+      "conRegion_km_a_SantaCruz": 1.2,
+      "conRegion_label": "94 Avenida La Paz, Santa Cruz, LI, Chile",
+      "conRegion_capa": "address",
+      "conRegion_confianza": 1
+    },
+    {
+      "direccion": "Av. Ramón Sanfurgo 30, Santa Cruz, O'Higgins",
+      "actual": {
+        "lat": -34.642453,
+        "lng": -71.367345
+      },
+      "actual_km_a_SantaCruz": 0.5,
+      "actual_ms": 333,
+      "conRegion": {
+        "lat": -34.642453,
+        "lng": -71.367345
+      },
+      "conRegion_km_a_SantaCruz": 0.5,
+      "conRegion_label": "Ramón Sanfurgo, Santa Cruz, LI, Chile",
+      "conRegion_capa": "street",
+      "conRegion_confianza": 1
+    },
+    {
+      "direccion": "Federico Errázuriz 1285, 3130046 Colchagua, Santa Cruz, O'Higgins",
+      "actual": {
+        "lat": -34.633427,
+        "lng": -71.353456
+      },
+      "actual_km_a_SantaCruz": 1.2,
+      "actual_ms": 313,
+      "conRegion": {
+        "lat": -34.633427,
+        "lng": -71.353456
+      },
+      "conRegion_km_a_SantaCruz": 1.2,
+      "conRegion_label": "1285 Federico Errázuriz, Santa Cruz, LI, Chile",
+      "conRegion_capa": "address",
+      "conRegion_confianza": 1
+    }
+  ]
+}
