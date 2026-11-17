@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { calcularRuta, guardarRuta } from '@/app/(dashboard)/rutas/actions';
 import { MapaRutaWrapper } from '@/components/rutas/MapaRutaWrapper';
+import { formatearCLP } from '@/lib/rutas/validar-cobro';
 import type {
     ChoferPlanificable,
     PedidoPlanificable,
@@ -474,6 +475,30 @@ export function PlanificadorRutas({ fecha, hoy, pedidos, choferes, sucursales, r
                                 <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                                     Detalle de la ruta #{rutaVista.id}
                                 </h4>
+
+                                {/* Cobros de la ruta (PBI-11.2, H-04): el jefe cuadra sin llamar al chofer */}
+                                <div className="mb-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                                    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                        Cobros de la ruta · {rutaVista.resumenCobros.cobrosRegistrados} registrado(s)
+                                    </p>
+                                    <div className="grid grid-cols-3 gap-2 text-center">
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-500 uppercase">Efectivo</p>
+                                            <p className="text-sm font-black text-emerald-700">{formatearCLP(rutaVista.resumenCobros.efectivo)}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-500 uppercase">Transferencia</p>
+                                            <p className="text-sm font-black text-[#005088]">{formatearCLP(rutaVista.resumenCobros.transferencia)}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-500 uppercase">Pendiente</p>
+                                            <p className={`text-sm font-black ${rutaVista.resumenCobros.pendiente > 0 ? 'text-amber-700' : 'text-slate-400'}`}>
+                                                {formatearCLP(rutaVista.resumenCobros.pendiente)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <ol className="space-y-1.5">
                                     {rutaVista.paradas.map((p) => (
                                         <li key={p.orden} className="flex items-start gap-3 text-sm">
@@ -484,6 +509,18 @@ export function PlanificadorRutas({ fecha, hoy, pedidos, choferes, sucursales, r
                                                 <span className="font-semibold text-slate-800">{p.clienteNombre}</span>
                                                 {p.estado === 'fallido' && (
                                                     <span className="block text-xs text-rose-700">Motivo: {p.motivoFallo ?? 'sin motivo registrado'}</span>
+                                                )}
+                                                {p.cobro && (
+                                                    <span className="block text-xs text-emerald-700">
+                                                        Cobrado {formatearCLP(p.cobro.monto)} · {p.cobro.metodo === 'efectivo' ? 'efectivo' : 'transferencia'}
+                                                        {p.cobro.referencia && ` (ref. ${p.cobro.referencia})`}
+                                                    </span>
+                                                )}
+                                                {p.estado === 'entregado' && !p.cobro && p.saldoPendiente === 0 && (
+                                                    <span className="block text-xs text-slate-500">Sin cobro (pedido pagado)</span>
+                                                )}
+                                                {p.saldoPendiente > 0 && (
+                                                    <span className="block text-xs font-semibold text-amber-700">Pendiente {formatearCLP(p.saldoPendiente)}</span>
                                                 )}
                                             </span>
                                             <span
