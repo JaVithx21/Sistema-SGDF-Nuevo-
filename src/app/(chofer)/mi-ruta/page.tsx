@@ -45,6 +45,7 @@ export default async function MiRutaPage() {
             lng: aNumero(p.lng),
             ventana_inicio: p.ventana_inicio,
             ventana_fin: p.ventana_fin,
+            monto_por_cobrar: aNumero(p.monto_por_cobrar) ?? 0,
         }))
         .sort((a, b) => a.orden - b.orden);
 

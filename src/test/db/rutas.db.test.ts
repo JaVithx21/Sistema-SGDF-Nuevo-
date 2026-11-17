@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { PGlite } from '@electric-sql/pglite';
 import type { ParadaChoferRow } from '@/types/rutas';
-import { comoUsuario, crearBaseConMigraciones, leerSql } from './supabase-pglite';
+import { comoUsuario, crearBaseConMigraciones, leerSql, listarMigraciones } from './supabase-pglite';
 
 // PBI-03 / RNF-SEG-01 / RSK-04 — las migraciones de supabase/ aplicadas sobre
 // Postgres en memoria: privacidad del chofer, RLS, persistencia de marcar_parada
@@ -10,6 +10,8 @@ import { comoUsuario, crearBaseConMigraciones, leerSql } from './supabase-pglite
 const COLUMNAS_CONTRATO = [
     'parada_id', 'ruta_id', 'fecha', 'vehiculo_patente', 'orden', 'estado', 'motivo_fallo', 'entregado_at',
     'razon_social', 'nombre_contacto', 'telefono', 'direccion', 'lat', 'lng', 'ventana_inicio', 'ventana_fin',
+    // ADR-03: única columna financiera permitida, el saldo de ESE pedido
+    'monto_por_cobrar',
 ] as const satisfies readonly (keyof ParadaChoferRow)[];
 
 // Si ParadaChoferRow cambia de columnas, el typecheck falla aquí
@@ -103,9 +105,12 @@ describe('Base de datos de rutas (PGlite)', () => {
     });
 
     describe('migraciones', () => {
-        it('las migraciones de rutas se pueden aplicar dos veces', async () => {
-            await db.exec(leerSql('migrations/20261026150000_rutas_y_paradas.sql'));
-            await db.exec(leerSql('migrations/20261026150100_funciones_chofer.sql'));
+        it('las migraciones posteriores al esquema base se pueden aplicar dos veces', async () => {
+            // Todas y en orden: aplicar solo una antigua (p. ej. funciones_chofer)
+            // recrearía una firma que una posterior ya reemplazó.
+            for (const migracion of listarMigraciones().filter((m) => !m.includes('_esquema_base'))) {
+                await db.exec(leerSql(migracion));
+            }
         });
 
         it('crean las UNIQUE de rutas y paradas con sus nombres finales', async () => {
@@ -136,9 +141,9 @@ describe('Base de datos de rutas (PGlite)', () => {
         it('anon no tiene EXECUTE sobre las funciones del chofer y authenticated sí', async () => {
             const r = await uno<Record<string, boolean>>(
                 `SELECT has_function_privilege('anon', 'public.mi_ruta_hoy()', 'EXECUTE') AS anon_ruta,
-                        has_function_privilege('anon', 'public.marcar_parada(bigint, text, text)', 'EXECUTE') AS anon_marcar,
+                        has_function_privilege('anon', 'public.marcar_parada(bigint, text, text, numeric, text, text)', 'EXECUTE') AS anon_marcar,
                         has_function_privilege('authenticated', 'public.mi_ruta_hoy()', 'EXECUTE') AS auth_ruta,
-                        has_function_privilege('authenticated', 'public.marcar_parada(bigint, text, text)', 'EXECUTE') AS auth_marcar`,
+                        has_function_privilege('authenticated', 'public.marcar_parada(bigint, text, text, numeric, text, text)', 'EXECUTE') AS auth_marcar`,
             );
             expect(r).toEqual({ anon_ruta: false, anon_marcar: false, auth_ruta: true, auth_marcar: true });
         });
@@ -194,13 +199,13 @@ describe('Base de datos de rutas (PGlite)', () => {
     });
 
     describe('mi_ruta_hoy()', () => {
-        it('REG-02 · devuelve exactamente las 16 columnas del contrato (src/types/rutas.ts)', async () => {
+        it('REG-02 · devuelve exactamente las 17 columnas del contrato (src/types/rutas.ts)', async () => {
             const { fields } = await comoUsuario(db, ids.choferSeed, (tx) => tx.query('SELECT * FROM mi_ruta_hoy()'));
             expect(contratoCompleto).toBe(true);
             expect(fields.map((f) => f.name)).toEqual([...COLUMNAS_CONTRATO]);
         });
 
-        it('REG-02 · no expone rut, total, saldo ni crédito', async () => {
+        it('REG-02 · no expone rut, total, saldo ni crédito; solo monto_por_cobrar (ADR-03)', async () => {
             const { rows, fields } = await comoUsuario(db, ids.choferSeed, (tx) => tx.query('SELECT * FROM mi_ruta_hoy()'));
             const nombres = fields.map((f) => f.name);
             for (const prohibida of COLUMNAS_PROHIBIDAS) expect(nombres).not.toContain(prohibida);
