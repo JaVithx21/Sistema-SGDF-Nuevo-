@@ -1,7 +1,8 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { requireAuth } from '@/lib/security/auth-guard';
+import { requireAuth, requireRole } from '@/lib/security/auth-guard';
+import { rolesDelModulo } from '@/constants/roles';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
@@ -264,7 +265,7 @@ export interface HistorialPrecioResult {
 export async function obtenerHistorialPrecios(
     productoId: number
 ): Promise<{ success: boolean; data: HistorialPrecioResult[]; error?: string }> {
-    const { error: authError } = await requireAuth();
+    const { error: authError } = await requireRole(rolesDelModulo('inventario'));
     if (authError) return { success: false, data: [], error: authError };
 
     const cookieStore = await cookies();

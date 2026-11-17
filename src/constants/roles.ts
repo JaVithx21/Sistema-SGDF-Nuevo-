@@ -34,6 +34,16 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     { key: 'administracion', label: 'Administración', href: '/administracion', icon: 'Settings', roles: ['admin'] },
 ];
 
+/**
+ * Roles de un módulo del menú. Las server actions del módulo exigen los mismos
+ * (RSK-11): así la pantalla y la acción no pueden divergir.
+ */
+export function rolesDelModulo(key: string): UserRole[] {
+    const item = SIDEBAR_ITEMS.find((i) => i.key === key);
+    if (!item) throw new Error(`Módulo desconocido: ${key}`);
+    return item.roles;
+}
+
 /** Pantalla de inicio de cada rol: destino tras el login y al ser rechazado en una ruta. */
 export const ROLE_HOME: Record<UserRole, string> = {
     admin: '/dashboard',

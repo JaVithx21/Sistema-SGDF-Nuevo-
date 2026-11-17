@@ -1,16 +1,14 @@
 ﻿'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { requireAuth } from '@/lib/security/auth-guard';
+import { requireAuth, requireRole } from '@/lib/security/auth-guard';
+import { rolesDelModulo } from '@/constants/roles';
 import { geocodificarDireccion } from '@/lib/geocoding';
 import { resolverCoordenadas } from '@/lib/clientes/coordenadas';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
-// RSK-11: las acciones de clientes exigen rol de oficina. Con la jerarquía de
-// requireAuth, 'vendedor' admite vendedor, jefe_operaciones, gerente y admin;
-// el chofer queda fuera.
-const ROL_MINIMO_OFICINA = 'vendedor';
+// RSK-11: cada acción exige los roles del módulo Clientes (los mismos del menú).
 
 // ─── Tipos ──────────────────────────────────────────────────────────────────
 
@@ -53,7 +51,7 @@ interface ActionResult {
 // ─── CREAR CLIENTE ──────────────────────────────────────────────────────────
 
 export async function crearCliente(data: ClienteFormData): Promise<ActionResult> {
-    const { error: authError } = await requireAuth(ROL_MINIMO_OFICINA);
+    const { error: authError } = await requireRole(rolesDelModulo('clientes'));
     if (authError) return { success: false, error: authError };
 
     const ventanaError = validarVentanaHoraria(data);
@@ -105,7 +103,7 @@ export async function actualizarCliente(
     id: number,
     data: ClienteFormData
 ): Promise<ActionResult> {
-    const { error: authError } = await requireAuth(ROL_MINIMO_OFICINA);
+    const { error: authError } = await requireRole(rolesDelModulo('clientes'));
     if (authError) return { success: false, error: authError };
 
     const ventanaError = validarVentanaHoraria(data);
@@ -223,7 +221,7 @@ export interface HistorialClienteResult {
 export async function obtenerHistorialPedidos(
     clienteId: number
 ): Promise<HistorialClienteResult> {
-    const { error: authError } = await requireAuth(ROL_MINIMO_OFICINA);
+    const { error: authError } = await requireRole(rolesDelModulo('clientes'));
     if (authError) return { success: false, pedidos: [], total_ventas: 0, pedidos_activos: 0, error: authError };
 
     const cookieStore = await cookies();

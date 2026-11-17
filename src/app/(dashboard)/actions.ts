@@ -1,7 +1,8 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { requireAuth } from '@/lib/security/auth-guard';
+import { requireRole } from '@/lib/security/auth-guard';
+import { rolesDelModulo } from '@/constants/roles';
 import { cookies } from 'next/headers';
 
 // ─── Tipos de resultado de búsqueda global ──────────────────────────────────
@@ -37,7 +38,7 @@ export interface GlobalSearchResult {
 // ─── BÚSQUEDA GLOBAL ────────────────────────────────────────────────────────
 
 export async function busquedaGlobal(query: string): Promise<GlobalSearchResult> {
-    const { error: authError } = await requireAuth();
+    const { error: authError } = await requireRole(rolesDelModulo('dashboard'));
     if (authError) return { productos: [], clientes: [], pedidos: [] };
 
     const trimmed = query.trim();

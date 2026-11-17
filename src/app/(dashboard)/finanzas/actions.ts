@@ -1,7 +1,8 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { requireAuth } from '@/lib/security/auth-guard';
+import { requireRole } from '@/lib/security/auth-guard';
+import { rolesDelModulo } from '@/constants/roles';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
@@ -30,7 +31,7 @@ interface ActionResult {
 
 export async function registrarPago(data: PagoFormData): Promise<ActionResult> {
     // ⚠️ Guard de autenticación — cualquier rol puede registrar pagos
-    const { user, error: authError } = await requireAuth();
+    const { user, error: authError } = await requireRole(rolesDelModulo('finanzas'));
     if (!user) return { success: false, error: authError ?? 'Sin autorización.' };
 
     const cookieStore = await cookies();

@@ -1,7 +1,8 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { requireAuth } from '@/lib/security/auth-guard';
+import { requireRole } from '@/lib/security/auth-guard';
+import { rolesDelModulo } from '@/constants/roles';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
@@ -32,7 +33,7 @@ interface ActionResult {
 // 5. El trigger `trg_pedidos_recalcular_saldo_cliente` actualiza `clientes.saldo_pendiente`
 
 export async function crearPedido(data: NuevoPedidoData): Promise<ActionResult> {
-    const { user, error: authError } = await requireAuth();
+    const { user, error: authError } = await requireRole(rolesDelModulo('pedidos'));
     if (!user) return { success: false, error: authError ?? 'Sin autorización.' };
 
     const cookieStore = await cookies();
@@ -122,7 +123,7 @@ export async function cambiarEstadoPedido(
     id: number,
     nuevoEstado: 'pendiente' | 'confirmado' | 'entregado' | 'anulado'
 ): Promise<ActionResult> {
-    const { error: authError } = await requireAuth();
+    const { error: authError } = await requireRole(rolesDelModulo('pedidos'));
     if (authError) return { success: false, error: authError };
 
     const cookieStore = await cookies();
@@ -200,7 +201,7 @@ export interface PedidoDetalleResult {
 }
 
 export async function obtenerDetallePedido(pedidoId: number): Promise<PedidoDetalleResult> {
-    const { error: authError } = await requireAuth();
+    const { error: authError } = await requireRole(rolesDelModulo('pedidos'));
     if (authError) return { success: false, detalles: [], pagos: [], error: authError };
 
     const cookieStore = await cookies();
@@ -274,7 +275,7 @@ export async function obtenerDetallePedido(pedidoId: number): Promise<PedidoDeta
 // ─── CREAR CLIENTE RÁPIDO ───────────────────────────────────────────────────
 
 export async function crearClienteRapido(data: { razon_social: string; rut: string }): Promise<ActionResult & { id?: number }> {
-    const { user, error: authError } = await requireAuth();
+    const { user, error: authError } = await requireRole(rolesDelModulo('pedidos'));
     if (!user) return { success: false, error: authError ?? 'Sin autorización.' };
 
     const cookieStore = await cookies();
