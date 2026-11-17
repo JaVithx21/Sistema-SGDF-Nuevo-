@@ -312,91 +312,47 @@ export async function guardarRuta(input: {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
-    const { data: chofer } = await supabase
-        .from('choferes')
-        .select('id, activo, vehiculo_default_id')
-        .eq('id', choferId)
-        .single();
-    if (!chofer?.activo || !chofer.vehiculo_default_id) {
-        return { success: false, error: 'El chofer no está activo o no tiene vehículo asignado.' };
-    }
-
-    // Coordenadas, ventanas y volúmenes se releen de la BD: no se confía en el navegador.
-    const carga = await cargarPedidos(supabase, paradas.map((p) => p.pedidoId));
-    if ('error' in carga) return { success: false, error: carga.error };
-    const porId = new Map(carga.pedidos.map((p) => [p.id, p]));
-    if (carga.pedidos.some((p) => p.lat === null || p.lng === null)) {
-        return { success: false, error: 'Hay pedidos sin ubicación en la ruta. Vuelve a calcularla.' };
-    }
-
-    const acotar = (n: unknown, max: number) => {
-        const v = aNumero(n);
-        return v === null ? null : Math.min(Math.max(v, 0), max);
-    };
-    const kmTotal = acotar(ruta.kmTotal, 9999) ?? 0;
-    const litros = acotar(ruta.litrosEstimados, 9999);
-
-    const { data: rutaBD, error: rutaError } = await supabase
-        .from('rutas_diarias')
-        .insert({
-            fecha,
-            sucursal_id: sucursalId,
-            vehiculo_id: chofer.vehiculo_default_id,
-            chofer_id: choferId,
-            estado: 'planificada',
-            km_planificados: Math.round(kmTotal * 100) / 100,
-            duracion_s: Math.round((acotar(ruta.duracionMin, 24 * 60) ?? 0) * 60),
-            volumen_total_m3: Math.round(carga.pedidos.reduce((a, p) => a + p.volumenM3, 0) * 10000) / 10000,
-            bencina_proyectada_lts: litros,
-            costo_bencina_proyectado: acotar(ruta.costoCombustibleClp, 99_999_999),
-            precio_litro_referencia: acotar(ruta.precioLitroReferencia, 9999),
-            // CHECK rutas_simulada_sin_geometria: una ruta simulada no lleva trazado
-            simulada: Boolean(ruta.simulada),
+    // DEF-15: ruta y paradas en una sola transacción. guardar_ruta() revalida en
+    // la base rol, chofer, pedidos y capacidad, y toma de la base coordenadas,
+    // ventanas y volúmenes; del cálculo firmado solo usa ids, orden, km y resumen.
+    const { data: rutaId, error } = await supabase.rpc('guardar_ruta', {
+        p_fecha: fecha,
+        p_sucursal_id: sucursalId,
+        p_chofer_id: choferId,
+        p_paradas: paradas.map((p) => ({ pedido_id: p.pedidoId, orden: p.orden, km_acumulados: p.kmAcumulados ?? null })),
+        p_resumen: {
+            km_planificados: ruta.kmTotal,
+            duracion_s: Math.round(ruta.duracionMin * 60),
+            simulada: ruta.simulada,
             geojson_ruta: ruta.simulada ? null : (ruta.geojsonRuta ?? null),
-            advertencias: (ruta.advertencias ?? []).filter((a) => typeof a === 'string').slice(0, 10),
-            creado_por: auth.userId,
-        })
-        .select('id')
-        .single();
+            advertencias: ruta.advertencias,
+            bencina_proyectada_lts: ruta.litrosEstimados,
+            costo_bencina_proyectado: ruta.costoCombustibleClp,
+            precio_litro_referencia: ruta.precioLitroReferencia,
+        },
+    });
 
-    if (rutaError || !rutaBD) {
-        if (rutaError?.code === '23505') {
-            if (rutaError.message.includes('uq_ruta_chofer_fecha')) {
+    if (error) {
+        if (error.code === '23505') {
+            if (error.message.includes('uq_ruta_chofer_fecha')) {
                 return { success: false, error: 'Ese chofer ya tiene una ruta para esa fecha.' };
+            }
+            if (error.message.includes('uq_parada_pedido_ruta')) {
+                return { success: false, error: 'Hay un pedido repetido en la ruta.' };
             }
             return { success: false, error: 'El vehículo de ese chofer ya tiene una ruta para esa fecha. Elige otra fecha u otro chofer.' };
         }
-        if (rutaError?.code === '42501') return { success: false, error: 'No tienes permiso para guardar rutas.' };
-        console.error('[rutas] insert rutas_diarias:', rutaError?.code, rutaError?.message);
+        if (error.code === '42501') return { success: false, error: 'No tienes permiso para guardar rutas.' };
+        // Reglas de negocio escritas en la función SQL (capacidad, pedidos, orden…)
+        if (error.code === 'P0001') return { success: false, error: error.message };
+        if (error.code === 'PGRST202') {
+            return { success: false, error: 'Falta aplicar la migración de guardar_ruta en la base (ver README).' };
+        }
+        console.error('[rutas] guardar_ruta:', error.code, error.message);
         return { success: false, error: 'No se pudo guardar la ruta.' };
-    }
-
-    const { error: paradasError } = await supabase.from('ruta_paradas').insert(
-        paradas.map((p) => {
-            const pedido = porId.get(p.pedidoId) as PedidoListo;
-            return {
-                ruta_id: rutaBD.id,
-                pedido_id: pedido.id,
-                orden: p.orden,
-                lat_destino: pedido.lat,
-                lng_destino: pedido.lng,
-                ventana_inicio: pedido.ventanaInicio,
-                ventana_fin: pedido.ventanaFin,
-                km_acumulados: acotar(p.kmAcumulados, 9999),
-                volumen_parada_m3: Math.round(pedido.volumenM3 * 10000) / 10000,
-            };
-        })
-    );
-
-    if (paradasError) {
-        // Sin transacción entre dos inserts: se deshace la ruta para no dejarla a medias.
-        await supabase.from('rutas_diarias').delete().eq('id', rutaBD.id);
-        console.error('[rutas] insert ruta_paradas:', paradasError.code, paradasError.message);
-        if (paradasError.code === '23505') return { success: false, error: 'Hay un pedido repetido en la ruta.' };
-        return { success: false, error: 'No se pudieron guardar las paradas; la ruta no se creó.' };
     }
 
     revalidatePath('/rutas');
     revalidatePath('/mi-ruta');
-    return { success: true, data: { rutaId: Number(rutaBD.id) } };
+    return { success: true, data: { rutaId: Number(rutaId) } };
 }
