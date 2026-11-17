@@ -342,7 +342,7 @@ export function PlanificadorRutas({ fecha, hoy, pedidos, choferes, sucursales, r
                         {sinUbicacion.length > 0 && (
                             <div className="bg-amber-50 border border-amber-200 text-amber-800 px-3 py-2 rounded-lg text-xs">
                                 <p className="font-bold flex items-center gap-1.5"><MapPinOff size={13} /> Sin ubicación ({sinUbicacion.length})</p>
-                                <p>No se pueden rutear hasta corregir la dirección del cliente: {sinUbicacion.map((p) => `#${p.id} ${p.clienteNombre}`).join(' · ')}</p>
+                                <p>No se pueden rutear hasta corregir su ubicación en Clientes (dirección o marcador en el mapa): {sinUbicacion.map((p) => `#${p.id} ${p.clienteNombre}`).join(' · ')}</p>
                             </div>
                         )}
 

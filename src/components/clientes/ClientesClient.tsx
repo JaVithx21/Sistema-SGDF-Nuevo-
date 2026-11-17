@@ -43,6 +43,8 @@ export interface ClienteData {
     ventana_fin: string | null;
     /** false = el geocodificador no encontró la dirección (lista «sin ubicación»). */
     con_ubicacion: boolean;
+    lat: number | null;
+    lng: number | null;
     saldo_pendiente: number;
     activo: boolean;
     total_pedidos: number;
@@ -114,6 +116,8 @@ function IconButton({
 export function ClientesClient({ clientes }: ClientesClientProps) {
     const role = useUserRole();
     const isManager = canAccess(role, ['admin', 'gerente']);
+    // PBI-01.1: el jefe de operaciones corrige ubicaciones antes de planificar.
+    const puedeEditar = canAccess(role, ['admin', 'gerente', 'jefe_operaciones']);
 
     // --- State ---
     const [searchQuery, setSearchQuery] = useState('');
@@ -396,13 +400,15 @@ export function ClientesClient({ clientes }: ClientesClientProps) {
                                                     color="text-[#005088] hover:bg-blue-50"
                                                     onClick={() => handleOpenDrawer(cliente)}
                                                 />
+                                                {puedeEditar && (
+                                                    <IconButton
+                                                        icon={Edit}
+                                                        title="Editar Cliente"
+                                                        onClick={() => handleOpenEdit(cliente)}
+                                                    />
+                                                )}
                                                 {isManager && (
                                                     <>
-                                                        <IconButton
-                                                            icon={Edit}
-                                                            title="Editar Cliente"
-                                                            onClick={() => handleOpenEdit(cliente)}
-                                                        />
                                                         {cliente.activo ? (
                                                             <IconButton
                                                                 icon={UserMinus}
@@ -462,6 +468,8 @@ export function ClientesClient({ clientes }: ClientesClientProps) {
                                 direccion: editingCliente.direccion,
                                 ventana_inicio: editingCliente.ventana_inicio,
                                 ventana_fin: editingCliente.ventana_fin,
+                                lat: editingCliente.lat,
+                                lng: editingCliente.lng,
                                 activo: editingCliente.activo,
                             }
                             : null

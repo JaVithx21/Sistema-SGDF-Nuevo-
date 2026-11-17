@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { X, Building2, User, Phone, Mail, MapPin, CreditCard, Clock } from 'lucide-react';
+import { X, Building2, User, Phone, Mail, MapPin, CreditCard, Clock, Crosshair } from 'lucide-react';
+import { SelectorUbicacionWrapper } from '@/components/clientes/SelectorUbicacionWrapper';
 
 interface ClienteModalProps {
     isOpen: boolean;
@@ -17,6 +18,8 @@ interface ClienteModalProps {
         activo: boolean;
         ventana_inicio?: string | null;
         ventana_fin?: string | null;
+        lat?: number | null;
+        lng?: number | null;
     } | null;
     onSubmit: (data: {
         razon_social: string;
@@ -28,6 +31,7 @@ interface ClienteModalProps {
         activo: boolean;
         ventana_inicio?: string | null;
         ventana_fin?: string | null;
+        ubicacion_manual?: { lat: number; lng: number } | null;
     }) => Promise<{ success: boolean; error?: string }>;
 }
 
@@ -46,6 +50,12 @@ export function ClienteModal({ isOpen, onClose, cliente, onSubmit }: ClienteModa
     // Los <input type="time"> trabajan con "HH:MM"; la BD guarda "HH:MM:SS".
     const [ventanaInicio, setVentanaInicio] = useState(cliente?.ventana_inicio?.slice(0, 5) ?? '');
     const [ventanaFin, setVentanaFin] = useState(cliente?.ventana_fin?.slice(0, 5) ?? '');
+    // PBI-01.1: null = no se movió el marcador (manda la dirección).
+    const [ubicacionManual, setUbicacionManual] = useState<{ lat: number; lng: number } | null>(null);
+    // Cambia al deshacer para volver a montar el mapa en la ubicación original.
+    const [versionMapa, setVersionMapa] = useState(0);
+    const ubicacionActual =
+        cliente?.lat != null && cliente?.lng != null ? { lat: cliente.lat, lng: cliente.lng } : null;
 
     if (!isOpen) return null;
 
@@ -75,6 +85,7 @@ export function ClienteModal({ isOpen, onClose, cliente, onSubmit }: ClienteModa
                 activo,
                 ventana_inicio: ventanaInicio || null,
                 ventana_fin: ventanaFin || null,
+                ubicacion_manual: ubicacionManual,
             });
 
             if (result.success) {
@@ -212,6 +223,43 @@ export function ClienteModal({ isOpen, onClose, cliente, onSubmit }: ClienteModa
                                 className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[#005088] focus:border-transparent outline-none transition-all"
                             />
                         </div>
+                    </div>
+
+                    {/* Ubicación en el mapa (PBI-01.1) */}
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                            Ubicación en el mapa
+                        </label>
+                        <div className="h-52 rounded-lg overflow-hidden border border-slate-200">
+                            <SelectorUbicacionWrapper
+                                key={versionMapa}
+                                inicial={ubicacionActual}
+                                onCambio={setUbicacionManual}
+                            />
+                        </div>
+                        {ubicacionManual ? (
+                            <div className="flex items-center justify-between mt-1.5 text-[11px] font-semibold text-emerald-700">
+                                <span className="flex items-center gap-1">
+                                    <Crosshair size={12} /> Ubicación ajustada en el mapa ({ubicacionManual.lat.toFixed(5)}, {ubicacionManual.lng.toFixed(5)})
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setUbicacionManual(null);
+                                        setVersionMapa((v) => v + 1);
+                                    }}
+                                    className="text-slate-500 hover:text-slate-700 underline"
+                                >
+                                    Deshacer
+                                </button>
+                            </div>
+                        ) : (
+                            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
+                                {ubicacionActual
+                                    ? 'Arrastra el marcador o haz clic en el mapa si la ubicación no es correcta.'
+                                    : 'Sin ubicación: se buscará por la dirección. Si no la encuentra, arrastra el marcador al lugar correcto.'}
+                            </p>
+                        )}
                     </div>
 
                     {/* Ventana horaria de recepción (VRPTW) */}
