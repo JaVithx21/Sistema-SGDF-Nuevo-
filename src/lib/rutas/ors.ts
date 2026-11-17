@@ -18,6 +18,8 @@ const URL_OPTIMIZACION = 'https://api.openrouteservice.org/optimization';
 const URL_DIRECCIONES = 'https://api.openrouteservice.org/v2/directions/driving-car/geojson';
 /** SPK-01: máximo medido 2,69 s con 50 paradas → 8 s deja ~3× de margen (DEC-07). */
 const TIMEOUT_MS = 8000;
+/** DEC-07 (DEF-13): sobre 3 s, por encima de todo lo medido en SPK-01, se avisa. */
+const UMBRAL_ALERTA_MS = 3000;
 
 export interface CalculoOrs {
     resultado: ResultadoCalculo;
@@ -89,6 +91,9 @@ export async function calcularConOrs(vehiculo: VehiculoEntrada, paradas: ParadaE
     if (!apiKey) return respaldo(vehiculo, paradas, 'sin_api_key');
 
     let datos: VroomResponse;
+    let latenciaMs = 0;
+    // Date.now y no performance.now: las pruebas simulan la latencia con un reloj falso.
+    const inicio = Date.now();
     try {
         const res = await fetch(URL_OPTIMIZACION, {
             method: 'POST',
@@ -104,6 +109,7 @@ export async function calcularConOrs(vehiculo: VehiculoEntrada, paradas: ParadaE
             return respaldo(vehiculo, paradas, /routable point/i.test(texto) ? 'punto_no_ruteable' : 'error_ors');
         }
         datos = (await res.json()) as VroomResponse;
+        latenciaMs = Date.now() - inicio;
     } catch (err) {
         const esTimeout = err instanceof Error && err.name === 'TimeoutError';
         console.warn(`[rutas] ORS Optimization no disponible (${esTimeout ? 'timeout' : 'error de red'}).`);
@@ -115,6 +121,12 @@ export async function calcularConOrs(vehiculo: VehiculoEntrada, paradas: ParadaE
     const resultado = interpretarRespuestaVroom(datos);
     const advertencias: string[] = [];
     let geojsonRuta: Record<string, unknown> | null = null;
+
+    if (latenciaMs > UMBRAL_ALERTA_MS) {
+        const segundos = (latenciaMs / 1000).toFixed(1).replace('.', ',');
+        console.warn(`[rutas] ORS Optimization tardó ${latenciaMs} ms (umbral ${UMBRAL_ALERTA_MS} ms).`);
+        advertencias.push(`OpenRouteService tardó ${segundos} s (sobre el umbral de 3 s de DEC-07).`);
+    }
 
     if (resultado.visitas.length > 0) {
         const porId = new Map(paradas.map((p) => [p.pedidoId, p]));
