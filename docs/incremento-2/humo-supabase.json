@@ -1,0 +1,118 @@
+{
+  "fecha": "2026-11-17T21:31:10.555Z",
+  "node": "v24.12.0",
+  "proyecto": "cxavayfuzieqfyvteras.supabase.co",
+  "aprobadas": 17,
+  "total": 17,
+  "resultados": [
+    {
+      "id": "AC-SEC-02",
+      "descripcion": "anon no puede ejecutar liquidar_ruta",
+      "ok": true,
+      "detalle": "rechazado (42501)"
+    },
+    {
+      "id": "AC-SEC-02",
+      "descripcion": "anon no puede ejecutar marcar_parada",
+      "ok": true,
+      "detalle": "rechazado (42501)"
+    },
+    {
+      "id": "REG-02",
+      "descripcion": "mi_ruta_hoy entrega 17 columnas con monto_por_cobrar",
+      "ok": true,
+      "detalle": "20 paradas, 17 columnas"
+    },
+    {
+      "id": "RNF-SEG-01",
+      "descripcion": "mi_ruta_hoy no expone RUT, total, saldo del cliente ni crédito",
+      "ok": true,
+      "detalle": ""
+    },
+    {
+      "id": "AC-SEC-01",
+      "descripcion": "el chofer no lee pagos directamente",
+      "ok": true,
+      "detalle": "0 filas"
+    },
+    {
+      "id": "AC-SEC-01",
+      "descripcion": "el chofer no lee clientes directamente",
+      "ok": true,
+      "detalle": "0 filas"
+    },
+    {
+      "id": "AC-SEC-01",
+      "descripcion": "el chofer no lee pedidos directamente",
+      "ok": true,
+      "detalle": "0 filas"
+    },
+    {
+      "id": "AC-SEC-01",
+      "descripcion": "el chofer no puede guardar rutas (guardar_ruta)",
+      "ok": true,
+      "detalle": "rechazado (42501)"
+    },
+    {
+      "id": "AC-COB-05",
+      "descripcion": "monto mayor que el saldo: rechazo de la base",
+      "ok": true,
+      "detalle": "El monto supera el saldo por cobrar ($20.000)."
+    },
+    {
+      "id": "AC-COB-05",
+      "descripcion": "transferencia sin referencia: rechazo de la base",
+      "ok": true,
+      "detalle": "Indica la referencia de la transferencia."
+    },
+    {
+      "id": "AC-COB-06",
+      "descripcion": "tras los rechazos la parada sigue pendiente y con su saldo",
+      "ok": true,
+      "detalle": ""
+    },
+    {
+      "id": "AC-COB-01",
+      "descripcion": "entrega con cobro en efectivo en 20 paradas",
+      "ok": true,
+      "detalle": "20/20 guardadas"
+    },
+    {
+      "id": "RNF-PERF-03",
+      "descripcion": "registro de entrega con cobro ≤2000 ms (p95)",
+      "ok": true,
+      "detalle": "mediana 197 ms · p95 206 ms · máx 213 ms"
+    },
+    {
+      "id": "AC-COB-04",
+      "descripcion": "repetir el cobro de una parada ya marcada se rechaza",
+      "ok": true,
+      "detalle": "Esta parada ya fue marcada como entregada; no se puede cambiar."
+    },
+    {
+      "id": "AC-COB-04",
+      "descripcion": "exactamente un pago por parada cobrada",
+      "ok": true,
+      "detalle": "20 pagos para 20 paradas"
+    },
+    {
+      "id": "RNF-INT-01",
+      "descripcion": "el jefe ve el total cobrado igual a lo registrado por el chofer",
+      "ok": true,
+      "detalle": "cobrado $400.000 · esperado $400.000"
+    },
+    {
+      "id": "DEF-15",
+      "descripcion": "guardar_ruta revalida en la base y rechaza datos inválidos (P0001)",
+      "ok": true,
+      "detalle": "El chofer no está activo o no tiene un vehículo activo asignado."
+    },
+    {
+      "medicion": "RNF-PERF-03",
+      "repeticiones": 20,
+      "medianaMs": 197,
+      "p95Ms": 206,
+      "maxMs": 213
+    }
+  ]
+}
