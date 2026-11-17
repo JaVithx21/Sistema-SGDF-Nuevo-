@@ -35,6 +35,8 @@ const contarVisibles = (sub: string) => comoUsuario(db, sub, (tx) =>
         `SELECT ${TABLAS_OFICINA.map((t) => `(SELECT count(*)::int FROM ${t}) AS ${t}`).join(', ')}`,
     ).then((r) => r.rows[0]));
 
+const contarPagos = async () => (await uno<{ n: number }>('SELECT count(*)::int AS n FROM pagos')).n;
+
 const leerPedido = (id: number) => uno<{ total: string; total_pagado: string; saldo: string }>(
     'SELECT total, total_pagado, saldo FROM pedidos WHERE id = $1', [id]);
 
@@ -79,7 +81,9 @@ describe('Permisos por rol (PGlite)', () => {
         ids.ruta = r.ruta;
         ids.parada = r.parada;
         ids.pedidos = (await db.query<{ id: number }>(
-            `SELECT id FROM pedidos WHERE nota = 'Pedido de ensayo (seed)' ORDER BY id`,
+            // Por RUT: [0] Santa Cruz (sin pagos) · [1] Marchigüe (pago de oficina parcial)
+            `SELECT p.id FROM pedidos p JOIN clientes c ON c.id = p.cliente_id
+              WHERE p.nota = 'Pedido de ensayo (seed)' ORDER BY c.rut`,
         )).rows.map((p) => p.id);
     }, 60_000);
 
@@ -169,8 +173,9 @@ describe('Permisos por rol (PGlite)', () => {
         });
 
         it('escritura: el chofer no puede insertar un pago', async () => {
+            const antes = await contarPagos();
             await expect(insertarPago(ids.chofer, ids.pedidos[0], 1000)).rejects.toMatchObject({ code: '42501' });
-            expect((await uno<{ n: number }>('SELECT count(*)::int AS n FROM pagos')).n).toBe(0);
+            expect(await contarPagos()).toBe(antes);
         });
 
         it('escritura: UPDATE pedidos SET total_pagado = total afecta 0 filas', async () => {
@@ -221,7 +226,8 @@ describe('Permisos por rol (PGlite)', () => {
         });
 
         it('el jefe de operaciones registra un pago y el trigger actualiza total_pagado y saldo', async () => {
-            await insertarPago(ids.jefe, ids.pedidos[1], 40000);
+            // La semilla deja $25.000 de saldo tras el pago de oficina parcial
+            await insertarPago(ids.jefe, ids.pedidos[1], 25000);
             expect(await leerPedido(ids.pedidos[1])).toEqual({ total: '40000.00', total_pagado: '40000.00', saldo: '0.00' });
         });
 
@@ -241,10 +247,11 @@ describe('Permisos por rol (PGlite)', () => {
         });
 
         it('pagos: el vendedor no puede editar ni borrar (sigue siendo solo admin)', async () => {
+            const antes = await contarPagos();
             const editar = await comoUsuario(db, ids.vendedor, (tx) => tx.query('UPDATE pagos SET nota = $1', ['x']));
             const borrar = await comoUsuario(db, ids.vendedor, (tx) => tx.query('DELETE FROM pagos'));
             expect([editar.affectedRows, borrar.affectedRows]).toEqual([0, 0]);
-            expect((await uno<{ n: number }>('SELECT count(*)::int AS n FROM pagos')).n).toBe(2);
+            expect(await contarPagos()).toBe(antes);
         });
     });
 });
