@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/security/auth-guard';
 import { validarMarcaParada } from '@/lib/rutas/validar-estado';
+import { parametrosCobro, validarCobro, type Cobro } from '@/lib/rutas/validar-cobro';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
@@ -16,15 +17,24 @@ const RPC_NO_EXISTE = 'PGRST202';
 const SIN_PERMISO = '42501';
 const RAISE_EXCEPTION = 'P0001';
 
-// ─── MARCAR PARADA (Entregado / Fallido) ────────────────────────────────────
-// El estado se guarda en la BD vía `marcar_parada` (ver src/types/rutas.ts).
-// No hay estado local optimista: la UI se vuelve a renderizar con lo que quedó
-// guardado, así un error nunca deja una parada "marcada" que no persistió.
+/** Cobro que elige el chofer al entregar (PBI-11.1). */
+export interface CobroEntrada {
+    opcion: 'efectivo' | 'transferencia' | 'sin_cobro';
+    monto?: number;
+    referencia?: string;
+}
+
+// ─── MARCAR PARADA (Entregado / Fallido, con cobro) ─────────────────────────
+// El estado y el cobro se guardan en la BD en una sola transacción vía
+// `marcar_parada` (ADR-03, ver src/types/rutas.ts). No hay estado local
+// optimista: la UI se vuelve a renderizar con lo que quedó guardado, así un
+// error nunca deja una parada "marcada" o "cobrada" que no persistió.
 
 export async function marcarParada(
     paradaId: number,
     estado: 'entregado' | 'fallido',
-    motivo?: string
+    motivo?: string,
+    cobroEntrada?: CobroEntrada
 ): Promise<ActionResult> {
     const { role, error: authError } = await requireAuth();
     if (authError) return { success: false, error: authError };
@@ -38,6 +48,18 @@ export async function marcarParada(
     const validacion = validarMarcaParada(paradaId, estado, motivo);
     if (!validacion.ok) return { success: false, error: validacion.error };
 
+    // El tope del saldo lo valida marcar_parada() con el saldo real de la BD:
+    // aquí no se confía en el saldo que conoce el navegador.
+    let cobro: Cobro | null = null;
+    if (cobroEntrada !== undefined && cobroEntrada !== null) {
+        if (validacion.valor.estado === 'fallido') {
+            return { success: false, error: 'Una entrega fallida no registra cobro.' };
+        }
+        const resultado = validarCobro({ ...cobroEntrada, porCobrar: Number.POSITIVE_INFINITY });
+        if (!resultado.ok) return { success: false, error: resultado.error };
+        cobro = resultado.cobro;
+    }
+
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
@@ -45,6 +67,7 @@ export async function marcarParada(
         p_parada_id: validacion.valor.paradaId,
         p_estado: validacion.valor.estado,
         p_motivo: validacion.valor.motivo,
+        ...parametrosCobro(cobro),
     });
 
     if (error) {
