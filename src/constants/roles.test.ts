@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isUserRole, ROLE_HOME, ROLE_PROTECTED_ROUTES, USER_ROLES } from './roles';
+import { isUserRole, ROLE_HOME, ROLE_PROTECTED_ROUTES, rolesDelModulo, SIDEBAR_ITEMS, USER_ROLES } from './roles';
 
 // DEF-02 / RSK-09: un rol fuera de la fuente única se deniega (fail-closed)
 
@@ -38,5 +38,19 @@ describe('rutas por rol', () => {
     it('el chofer no aparece en ningún módulo del panel', () => {
         const panel = ROLE_PROTECTED_ROUTES.filter((r) => r.prefix !== '/mi-ruta');
         for (const ruta of panel) expect(ruta.roles).not.toContain('chofer');
+    });
+});
+
+describe('rolesDelModulo (RSK-11)', () => {
+    it('devuelve los mismos roles con que el menú muestra el módulo', () => {
+        for (const item of SIDEBAR_ITEMS) expect(rolesDelModulo(item.key)).toEqual(item.roles);
+    });
+
+    it('Finanzas no incluye a jefe de operaciones ni al chofer', () => {
+        expect(rolesDelModulo('finanzas')).toEqual(['admin', 'gerente', 'vendedor']);
+    });
+
+    it('falla con un módulo inexistente en vez de abrir el acceso', () => {
+        expect(() => rolesDelModulo('no-existe')).toThrow(/Módulo desconocido/);
     });
 });

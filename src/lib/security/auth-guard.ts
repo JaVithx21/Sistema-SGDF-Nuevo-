@@ -102,3 +102,19 @@ export async function requireAuth(minimumRole?: UserRole): Promise<AuthResult> {
 
     return { user, role: perfil.rol, error: null };
 }
+
+// ─── Guard por lista de roles (RSK-11) ──────────────────────────────────────
+// Para módulos que no calzan con la jerarquía (p. ej. Finanzas admite vendedor
+// pero no jefe_operaciones). Uso:
+//   const { user, error } = await requireRole(rolesDelModulo('finanzas'));
+
+export async function requireRole(roles: readonly UserRole[]): Promise<AuthResult> {
+    const res = await requireAuth();
+    if (res.user === null) return res;
+
+    if (!roles.includes(res.role)) {
+        return { user: null, error: 'Sin autorización para realizar esta acción.' };
+    }
+
+    return res;
+}

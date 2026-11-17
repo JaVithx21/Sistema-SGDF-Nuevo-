@@ -24,7 +24,7 @@ vi.mock('@/lib/supabase/server', () => ({
     }),
 }));
 
-import { requireAuth } from './auth-guard';
+import { requireAuth, requireRole } from './auth-guard';
 
 function conSesion(rol: unknown) {
     supabase.user = { id: 'uid-1', email: 'u@sgdf.cl' };
@@ -93,5 +93,35 @@ describe('requireAuth', () => {
         supabase.perfiles = { id: null, email: { rol: 'admin' } };
         const res = await requireAuth('admin');
         expect(res.role).toBe('admin');
+    });
+});
+
+describe('requireRole (RSK-11)', () => {
+    const FINANZAS = ['admin', 'gerente', 'vendedor'] as const;
+
+    it('deniega al chofer en una acción de oficina', async () => {
+        conSesion('chofer');
+        const res = await requireRole(FINANZAS);
+        expect(res.user).toBeNull();
+        expect(res.error).toMatch(/Sin autorización/);
+    });
+
+    it('usa rol exacto, no jerarquía: jefe_operaciones no entra a Finanzas', async () => {
+        conSesion('jefe_operaciones');
+        const res = await requireRole(FINANZAS);
+        expect(res.user).toBeNull();
+    });
+
+    it('acepta un rol de la lista y lo devuelve', async () => {
+        conSesion('vendedor');
+        const res = await requireRole(FINANZAS);
+        expect(res.error).toBeNull();
+        expect(res.role).toBe('vendedor');
+    });
+
+    it('mantiene el fail-closed: sin sesión o con rol desconocido deniega', async () => {
+        expect((await requireRole(FINANZAS)).error).toMatch(/No autenticado/);
+        conSesion('superadmin');
+        expect((await requireRole(FINANZAS)).error).toMatch(/rol no reconocido/);
     });
 });
