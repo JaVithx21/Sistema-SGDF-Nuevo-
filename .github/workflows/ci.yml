@@ -35,4 +35,6 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+      - name: Regresión prioritaria (Incremento 1)
+        run: npm run test:regresion
       - run: npm test

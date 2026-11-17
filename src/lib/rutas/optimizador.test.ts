@@ -23,7 +23,7 @@ function parada(pedidoId: number, lat: number, extra: Partial<ParadaEntrada> = {
     return { pedidoId, ubicacion: { lat, lng: 0 }, volumenDm3: 1000, pesoKg: 100, ventana: null, servicioSeg: 600, ...extra };
 }
 
-describe('conversiones', () => {
+describe('REG-04 · conversiones', () => {
     it('convierte horas y volúmenes a enteros para VROOM', () => {
         expect(horaASegundos('07:30')).toBe(27000);
         expect(horaASegundos('07:30:15')).toBe(27015);
@@ -37,7 +37,7 @@ describe('conversiones', () => {
     });
 });
 
-describe('respaldo local (vecino más cercano)', () => {
+describe('REG-04 · respaldo local (vecino más cercano)', () => {
     it('visita la parada más cercana y numera en orden', () => {
         const r = rutaVecinoMasCercano(FURGON, [parada(30, 0.03), parada(10, 0.01), parada(20, 0.02)]);
         expect(r.visitas.map((v) => v.pedidoId)).toEqual([10, 20, 30]);
@@ -68,7 +68,7 @@ describe('respaldo local (vecino más cercano)', () => {
     });
 });
 
-describe('VROOM', () => {
+describe('REG-04 · VROOM', () => {
     it('arma la solicitud con [lng, lat], volumen y peso enteros, ventanas y options.g', () => {
         const req = construirSolicitudVroom(FURGON, [
             parada(5, -34.6, { ubicacion: { lat: -34.6, lng: -71.3 }, ventana: [32400, 46800] }),

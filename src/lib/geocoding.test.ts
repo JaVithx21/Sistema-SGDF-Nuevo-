@@ -60,13 +60,13 @@ describe('geocodificarDireccion (PBI-01)', () => {
         ['ORS no responde en 5 s', () => Promise.reject(Object.assign(new Error('timeout'), { name: 'TimeoutError' }))],
         ['ORS responde 500', () => Promise.resolve(respuesta({ error: 'x' }, 500))],
         ['ORS rechaza el token (403)', () => Promise.resolve(respuesta({}, 403))],
-    ])('nunca bloquea el guardado: %s → null (AC-01-error)', async (_caso, falla) => {
+    ])('REG-05 · nunca bloquea el guardado: %s → null (AC-01-error)', async (_caso, falla) => {
         vi.stubEnv('ORS_API_KEY', 'test');
         vi.stubGlobal('fetch', vi.fn().mockImplementation(falla));
         await expect(geocodificarDireccion('Av. Errázuriz 1137, Santa Cruz')).resolves.toBeNull();
     });
 
-    it('sin API key devuelve null (AC-01-error)', async () => {
+    it('REG-05 · sin API key devuelve null (AC-01-error)', async () => {
         vi.stubEnv('ORS_API_KEY', '');
         expect(await geocodificarDireccion('Av. Errázuriz 1137, Santa Cruz')).toBeNull();
     });
