@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/security/auth-guard';
 import { obtenerParametrosOperacionales } from '@/lib/parametros';
 import { calcularConOrs } from '@/lib/rutas/ors';
+import { FirmaNoConfiguradaError, firmarRuta, verificarFirma, type RutaSinFirma } from '@/lib/rutas/firma';
 import { esFechaIso, hoyEnChile } from '@/lib/rutas/fecha';
 import { horaASegundos, m3ADm3, segundosAHora, type ParadaEntrada } from '@/lib/rutas/optimizador';
 import type { UserRole } from '@/constants/roles';
@@ -37,6 +38,8 @@ function uno<T>(valor: T | T[] | null | undefined): T | null {
 }
 
 const esId = (n: unknown): n is number => Number.isInteger(n) && (n as number) > 0;
+
+const SIN_SECRETO = 'Falta configurar RUTAS_FIRMA_SECRET en el servidor (ver README).';
 
 async function autorizar(): Promise<{ userId: string } | { error: string }> {
     const { user, role, error } = await requireAuth();
@@ -231,37 +234,41 @@ export async function calcularRuta(input: {
         advertencias.push(`${sinUbicacion.length} pedido(s) quedaron fuera porque el cliente no tiene ubicación.`);
     }
 
-    return {
-        success: true,
-        data: {
-            paradas: visitas.map((v, i) => {
-                const p = porId.get(v.pedidoId) as PedidoListo;
-                return {
-                    pedidoId: p.id,
-                    orden: i + 1,
-                    clienteNombre: p.clienteNombre,
-                    lat: p.lat as number,
-                    lng: p.lng as number,
-                    llegada: v.llegadaSeg !== null ? segundosAHora(v.llegadaSeg) : null,
-                    kmAcumulados: v.distanciaAcumM !== null ? Math.round(v.distanciaAcumM / 100) / 10 : null,
-                    volumenM3: p.volumenM3,
-                };
-            }),
-            pedidosNoAsignados: calculo.resultado.sinAsignar,
-            pedidosSinUbicacion: sinUbicacion.map((p) => p.id),
-            kmTotal,
-            duracionMin: Math.round(calculo.resultado.duracionSeg / 60),
-            simulada: calculo.simulada,
-            motivoRespaldo: calculo.motivoRespaldo,
-            geojsonRuta: calculo.geojsonRuta,
-            advertencias,
-            volumenTotalM3: visitas.reduce((acc, v) => acc + (porId.get(v.pedidoId)?.volumenM3 ?? 0), 0),
-            pesoTotalKg: visitas.reduce((acc, v) => acc + (porId.get(v.pedidoId)?.pesoKg ?? 0), 0),
-            litrosEstimados: litros,
-            costoCombustibleClp: litros !== null ? Math.round(litros * parametros.precioLitroDiesel) : null,
-            precioLitroReferencia: parametros.precioLitroDiesel,
-        },
+    const ruta: RutaSinFirma = {
+        paradas: visitas.map((v, i) => {
+            const p = porId.get(v.pedidoId) as PedidoListo;
+            return {
+                pedidoId: p.id,
+                orden: i + 1,
+                clienteNombre: p.clienteNombre,
+                lat: p.lat as number,
+                lng: p.lng as number,
+                llegada: v.llegadaSeg !== null ? segundosAHora(v.llegadaSeg) : null,
+                kmAcumulados: v.distanciaAcumM !== null ? Math.round(v.distanciaAcumM / 100) / 10 : null,
+                volumenM3: p.volumenM3,
+            };
+        }),
+        pedidosNoAsignados: calculo.resultado.sinAsignar,
+        pedidosSinUbicacion: sinUbicacion.map((p) => p.id),
+        kmTotal,
+        duracionMin: Math.round(calculo.resultado.duracionSeg / 60),
+        simulada: calculo.simulada,
+        motivoRespaldo: calculo.motivoRespaldo,
+        geojsonRuta: calculo.geojsonRuta,
+        advertencias,
+        volumenTotalM3: visitas.reduce((acc, v) => acc + (porId.get(v.pedidoId)?.volumenM3 ?? 0), 0),
+        pesoTotalKg: visitas.reduce((acc, v) => acc + (porId.get(v.pedidoId)?.pesoKg ?? 0), 0),
+        litrosEstimados: litros,
+        costoCombustibleClp: litros !== null ? Math.round(litros * parametros.precioLitroDiesel) : null,
+        precioLitroReferencia: parametros.precioLitroDiesel,
     };
+
+    try {
+        return { success: true, data: { ...ruta, firma: firmarRuta(ruta, { sucursalId, choferId }) } };
+    } catch (err) {
+        if (err instanceof FirmaNoConfiguradaError) return { success: false, error: SIN_SECRETO };
+        throw err;
+    }
 }
 
 // ─── GUARDAR RUTA (PBI-04) ──────────────────────────────────────────────────
@@ -283,6 +290,24 @@ export async function guardarRuta(input: {
     const paradas = ruta?.paradas ?? [];
     const ordenValido = paradas.every((p, i) => esId(p.pedidoId) && p.orden === i + 1);
     if (paradas.length === 0 || !ordenValido) return { success: false, error: 'La ruta no tiene paradas válidas.' };
+
+    // DEF-14 (ADR-04): antes de tocar la base, la ruta debe ser exactamente la
+    // que calculó el servidor para este chofer y este origen.
+    let firma: ReturnType<typeof verificarFirma>;
+    try {
+        firma = verificarFirma(ruta, { sucursalId, choferId });
+    } catch (err) {
+        if (err instanceof FirmaNoConfiguradaError) return { success: false, error: SIN_SECRETO };
+        throw err;
+    }
+    if (!firma.ok) {
+        return {
+            success: false,
+            error: firma.motivo === 'vencida'
+                ? 'El cálculo de la ruta venció; vuelve a calcularla.'
+                : 'La ruta fue modificada; vuelve a calcularla.',
+        };
+    }
 
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);

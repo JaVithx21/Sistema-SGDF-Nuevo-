@@ -31,6 +31,7 @@ Están en `.env.example`. Para la demostración bastan estas:
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clave pública (la protege RLS) |
 | `ORS_API_KEY` | Geocodificación, optimización y trazado de rutas. Sin ella, las rutas se calculan con el respaldo local («simulada») |
+| `RUTAS_FIRMA_SECRET` | Firma del cálculo de ruta (DEF-14): el servidor solo guarda la ruta que él calculó. Mínimo 32 caracteres; generarla con `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 
 ## Base de datos
 Las migraciones están en `supabase/migrations/`:

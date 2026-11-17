@@ -72,6 +72,8 @@ export interface RutaCalculada {
     litrosEstimados: number | null;
     costoCombustibleClp: number | null;
     precioLitroReferencia: number;
+    /** DEF-14: firma del servidor; guardarRuta() solo acepta la ruta tal como se calculó. */
+    firma: string;
 }
 
 export interface ParadaGuardada {
