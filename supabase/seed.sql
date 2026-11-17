@@ -29,6 +29,9 @@
 --    4. Entrar en /login con ese correo y contraseña → /mi-ruta.
 --    Para usar otro usuario ya existente, cambiar v_email_chofer abajo.
 --
+--  Saldos (cobro en terreno, ADR-03): Santa Cruz $40.000 sin pagos, Marchigüe
+--  $25.000 tras un pago de oficina parcial, Palmilla pagado completo.
+--
 --  Coordenadas: centros aproximados de cada localidad (Peralillo, Santa Cruz,
 --  Marchigüe y Palmilla, Región de O'Higgins).
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -104,6 +107,21 @@ BEGIN
             WHERE nombre IN ('Rosa roja x20 (seed)', 'Clavel x25 (seed)');
         END IF;
     END LOOP;
+
+    -- ─── Saldos variados para el cobro en terreno (ADR-03) ──────────────
+    -- Santa Cruz: sin pagos (saldo $40.000) · Marchigüe: pago de oficina
+    -- parcial de $15.000 (saldo $25.000) · Palmilla: pagado completo (sin cobro).
+    -- Solo si el pedido aún no tiene pagos: correrla otra vez no los duplica.
+    INSERT INTO pagos (pedido_id, cliente_id, monto, metodo_pago, nota)
+    SELECT p.id, p.cliente_id,
+           CASE cl.rut WHEN '76000002-7' THEN 15000 ELSE p.total END,
+           'transferencia', 'Pago de oficina (seed)'
+      FROM pedidos p
+      JOIN clientes cl ON cl.id = p.cliente_id
+     WHERE p.nota = 'Pedido de ensayo (seed)'
+       AND cl.rut IN ('76000002-7', '76000003-5')
+       AND p.total > 0
+       AND NOT EXISTS (SELECT 1 FROM pagos pg WHERE pg.pedido_id = p.id);
 
     -- ─── Chofer de prueba ───────────────────────────────────────────────
     SELECT id INTO v_auth_id FROM auth.users WHERE email = v_email_chofer;
