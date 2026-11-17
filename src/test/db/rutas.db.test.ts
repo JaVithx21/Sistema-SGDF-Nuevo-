@@ -194,13 +194,13 @@ describe('Base de datos de rutas (PGlite)', () => {
     });
 
     describe('mi_ruta_hoy()', () => {
-        it('devuelve exactamente las 16 columnas del contrato (src/types/rutas.ts)', async () => {
+        it('REG-02 · devuelve exactamente las 16 columnas del contrato (src/types/rutas.ts)', async () => {
             const { fields } = await comoUsuario(db, ids.choferSeed, (tx) => tx.query('SELECT * FROM mi_ruta_hoy()'));
             expect(contratoCompleto).toBe(true);
             expect(fields.map((f) => f.name)).toEqual([...COLUMNAS_CONTRATO]);
         });
 
-        it('no expone rut, total, saldo ni crédito', async () => {
+        it('REG-02 · no expone rut, total, saldo ni crédito', async () => {
             const { rows, fields } = await comoUsuario(db, ids.choferSeed, (tx) => tx.query('SELECT * FROM mi_ruta_hoy()'));
             const nombres = fields.map((f) => f.name);
             for (const prohibida of COLUMNAS_PROHIBIDAS) expect(nombres).not.toContain(prohibida);
@@ -278,7 +278,7 @@ describe('Base de datos de rutas (PGlite)', () => {
             expect(p.entregado_at).toBeInstanceOf(Date);
         });
 
-        it('guarda un fallo con el motivo recortado', async () => {
+        it('REG-01 · guarda un fallo con el motivo recortado', async () => {
             await marcar(ids.choferSeed, ids.paradasSeed[1], 'fallido', '  Local cerrado  ');
             expect(await leerParada(ids.paradasSeed[1])).toMatchObject({ estado: 'fallido', motivo_fallo: 'Local cerrado' });
         });
@@ -298,12 +298,12 @@ describe('Base de datos de rutas (PGlite)', () => {
                 .rejects.toMatchObject({ code: 'P0001', message: expect.stringMatching(/ya fue marcada como no entregada/) });
         });
 
-        it.each([null, '', '   '])('no permite fallar sin motivo: %j (AC-03-error)', async (motivo) => {
+        it.each([null, '', '   '])('REG-01 · no permite fallar sin motivo: %j (AC-03-error)', async (motivo) => {
             await expect(marcar(ids.choferSeed, ids.paradasSeed[2], 'fallido', motivo))
                 .rejects.toMatchObject({ code: 'P0001', message: 'Indica el motivo por el que no se pudo entregar.' });
         });
 
-        it('acepta un motivo de 200 caracteres y rechaza uno de 201 (AC-03-límite)', async () => {
+        it('REG-01 · acepta un motivo de 200 caracteres y rechaza uno de 201 (AC-03-límite)', async () => {
             await expect(marcar(ids.choferSeed, ids.paradasSeed[2], 'fallido', 'x'.repeat(201)))
                 .rejects.toMatchObject({ code: 'P0001', message: 'El motivo no puede superar 200 caracteres.' });
             // Se deshace para dejar la parada pendiente para las pruebas siguientes
@@ -342,13 +342,13 @@ describe('Base de datos de rutas (PGlite)', () => {
             }
         });
 
-        it('el CHECK impide guardar un fallo sin motivo aun por SQL directo', async () => {
+        it('REG-01 · el CHECK impide guardar un fallo sin motivo aun por SQL directo', async () => {
             await expect(db.query(`UPDATE ruta_paradas SET estado = 'fallido', motivo_fallo = '  ' WHERE id = $1`,
                 [ids.paradasSeed[2]])).rejects.toMatchObject({ code: '23514', constraint: 'paradas_fallo_con_motivo' });
         });
     });
 
-    describe('una ruta por vehículo y por chofer al día (RSK-04)', () => {
+    describe('REG-03 · una ruta por vehículo y por chofer al día (RSK-04)', () => {
         // Como lo hace el planificador: con la sesión del jefe de operaciones (RLS activo)
         const crearRuta = (patente: string, usuarioChofer: string, fecha = HOY) => comoUsuario(db, ids.jefe, (tx) =>
             tx.query(

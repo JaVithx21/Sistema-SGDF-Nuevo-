@@ -24,7 +24,7 @@ const respuestaVroom = {
 const geojson = { type: 'FeatureCollection', features: [] };
 const json = (cuerpo: unknown, status = 200) => new Response(JSON.stringify(cuerpo), { status });
 
-describe('calcularConOrs', () => {
+describe('REG-04 · calcularConOrs', () => {
     afterEach(() => {
         vi.unstubAllGlobals();
         vi.unstubAllEnvs();

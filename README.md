@@ -72,8 +72,17 @@ npm run typecheck   # TypeScript sin errores
 npm run lint        # ESLint sin errores
 npm test            # pruebas automáticas (Vitest)
 npm run build       # build de producción
+npm run test:regresion  # solo la regresión prioritaria del Incremento 1 (pruebas REG-)
 ```
-El CI (`.github/workflows/ci.yml`) ejecuta los cuatro pasos en cada pull request.
+El CI (`.github/workflows/ci.yml`) ejecuta los cuatro pasos en cada pull request, y antes de `npm test` corre la regresión prioritaria como paso visible:
+
+| ID | Protege | Pruebas |
+|---|---|---|
+| REG-01 | Marcar Fallido con motivo | `rutas.db.test.ts` (`marcar_parada`), `validar-estado.test.ts` |
+| REG-02 | Privacidad de `mi_ruta_hoy` (columnas) | `rutas.db.test.ts` |
+| REG-03 | Ruta única (`uq_ruta_vehiculo_fecha`, `uq_ruta_chofer_fecha`) | `rutas.db.test.ts` |
+| REG-04 | Cálculo con ORS y respaldo local | `ors.test.ts`, `optimizador.test.ts` |
+| REG-05 | Geocodificación que no bloquea el guardado | `geocoding.test.ts` |
 
 ## Forma de trabajo
 - Todo cambio entra por **pull request** a `main`, con **revisión del otro integrante** y el CI en verde.

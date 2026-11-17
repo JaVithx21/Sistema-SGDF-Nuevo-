@@ -12,7 +12,7 @@ describe('validarMarcaParada', () => {
         });
     });
 
-    it('acepta un fallo con motivo y lo recorta', () => {
+    it('REG-01 · acepta un fallo con motivo y lo recorta', () => {
         expect(validarMarcaParada(7, 'fallido', '  Local cerrado  ')).toEqual({
             ok: true,
             valor: { paradaId: 7, estado: 'fallido', motivo: 'Local cerrado' },
@@ -27,19 +27,19 @@ describe('validarMarcaParada', () => {
         expect(validarMarcaParada(1, estado)).toEqual({ ok: false, error: 'Estado no válido.' });
     });
 
-    it.each([undefined, null, '', '   '])('exige motivo si es fallido: %s (AC-03-error)', (motivo) => {
+    it.each([undefined, null, '', '   '])('REG-01 · exige motivo si es fallido: %s (AC-03-error)', (motivo) => {
         expect(validarMarcaParada(1, 'fallido', motivo)).toEqual({
             ok: false,
             error: 'Indica el motivo por el que no se pudo entregar.',
         });
     });
 
-    it(`acepta un motivo de exactamente ${MOTIVO_MAX_LENGTH} caracteres (AC-03-límite)`, () => {
+    it(`REG-01 · acepta un motivo de exactamente ${MOTIVO_MAX_LENGTH} caracteres (AC-03-límite)`, () => {
         const motivo = 'x'.repeat(MOTIVO_MAX_LENGTH);
         expect(validarMarcaParada(1, 'fallido', motivo)).toMatchObject({ ok: true, valor: { motivo } });
     });
 
-    it(`rechaza un motivo de ${MOTIVO_MAX_LENGTH + 1} caracteres (AC-03-límite)`, () => {
+    it(`REG-01 · rechaza un motivo de ${MOTIVO_MAX_LENGTH + 1} caracteres (AC-03-límite)`, () => {
         expect(validarMarcaParada(1, 'fallido', 'x'.repeat(MOTIVO_MAX_LENGTH + 1))).toEqual({
             ok: false,
             error: `El motivo no puede superar ${MOTIVO_MAX_LENGTH} caracteres.`,
