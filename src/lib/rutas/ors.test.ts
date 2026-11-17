@@ -73,6 +73,42 @@ describe('calcularConOrs', () => {
         expect(r.advertencias[0]).toMatch(/Ruta simulada/);
     });
 
+    describe('alerta de latencia de DEC-07 (DEF-13)', () => {
+        afterEach(() => {
+            vi.useRealTimers();
+            vi.restoreAllMocks();
+        });
+
+        // La respuesta "tarda" lo que avanza el reloj falso antes de resolverse.
+        const vroomQueTarda = (ms: number) => async () => {
+            vi.setSystemTime(Date.now() + ms);
+            return json(respuestaVroom);
+        };
+
+        it('DEF-13: si ORS tarda más de 3 s, la ruta se entrega igual con una advertencia visible', async () => {
+            vi.useFakeTimers({ toFake: ['Date'] });
+            const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            vi.stubEnv('ORS_API_KEY', 'test');
+            vi.stubGlobal('fetch', vi.fn().mockImplementationOnce(vroomQueTarda(3500)).mockResolvedValueOnce(json(geojson)));
+
+            const r = await calcularConOrs(VEHICULO, PARADAS);
+
+            expect(r.simulada).toBe(false);
+            expect(r.advertencias).toContain('OpenRouteService tardó 3,5 s (sobre el umbral de 3 s de DEC-07).');
+            expect(warn).toHaveBeenCalledWith(expect.stringContaining('3500 ms'));
+        });
+
+        it('DEF-13: bajo 3 s no hay advertencia de latencia', async () => {
+            vi.useFakeTimers({ toFake: ['Date'] });
+            vi.stubEnv('ORS_API_KEY', 'test');
+            vi.stubGlobal('fetch', vi.fn().mockImplementationOnce(vroomQueTarda(2700)).mockResolvedValueOnce(json(geojson)));
+
+            const r = await calcularConOrs(VEHICULO, PARADAS);
+
+            expect(r.advertencias.join(' ')).not.toMatch(/umbral de 3 s/);
+        });
+    });
+
     it('usa el respaldo simulado si ORS no responde en 8 s', async () => {
         vi.stubEnv('ORS_API_KEY', 'test');
         vi.stubGlobal('fetch', vi.fn().mockRejectedValue(Object.assign(new Error('timeout'), { name: 'TimeoutError' })));
