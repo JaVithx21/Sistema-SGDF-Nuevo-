@@ -3,8 +3,14 @@
 import { createClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/security/auth-guard';
 import { geocodificarDireccion } from '@/lib/geocoding';
+import { resolverCoordenadas } from '@/lib/clientes/coordenadas';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
+
+// RSK-11: las acciones de clientes exigen rol de oficina. Con la jerarquía de
+// requireAuth, 'vendedor' admite vendedor, jefe_operaciones, gerente y admin;
+// el chofer queda fuera.
+const ROL_MINIMO_OFICINA = 'vendedor';
 
 // ─── Tipos ──────────────────────────────────────────────────────────────────
 
@@ -19,6 +25,8 @@ interface ClienteFormData {
     /** Ventana horaria de recepción "HH:MM" — null = sin restricción (VRPTW). */
     ventana_inicio?: string | null;
     ventana_fin?: string | null;
+    /** PBI-01.1: ubicación fijada a mano en el mapa; null = usar la dirección. */
+    ubicacion_manual?: { lat: number; lng: number } | null;
 }
 
 /**
@@ -45,16 +53,23 @@ interface ActionResult {
 // ─── CREAR CLIENTE ──────────────────────────────────────────────────────────
 
 export async function crearCliente(data: ClienteFormData): Promise<ActionResult> {
-    const { error: authError } = await requireAuth();
+    const { error: authError } = await requireAuth(ROL_MINIMO_OFICINA);
     if (authError) return { success: false, error: authError };
 
     const ventanaError = validarVentanaHoraria(data);
     if (ventanaError) return { success: false, error: ventanaError };
 
+    const ubicacion = await resolverCoordenadas({
+        manual: data.ubicacion_manual,
+        cambioDireccion: true,
+        direccion: data.direccion || null,
+        geocodificar: geocodificarDireccion,
+    });
+    if (!ubicacion.ok) return { success: false, error: ubicacion.error };
+    const coords = ubicacion.coords;
+
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-
-    const coords = await geocodificarDireccion(data.direccion);
 
     const { error } = await supabase
         .from('clientes')
@@ -90,7 +105,7 @@ export async function actualizarCliente(
     id: number,
     data: ClienteFormData
 ): Promise<ActionResult> {
-    const { error: authError } = await requireAuth();
+    const { error: authError } = await requireAuth(ROL_MINIMO_OFICINA);
     if (authError) return { success: false, error: authError };
 
     const ventanaError = validarVentanaHoraria(data);
@@ -101,12 +116,17 @@ export async function actualizarCliente(
 
     // DEF-05: solo se vuelve a geocodificar si cambió la dirección. Antes se
     // geocodificaba en cada edición y, si el servicio fallaba, se perdían
-    // coordenadas válidas. Si la dirección cambió, las coordenadas viejas ya no
-    // sirven: se reemplazan por las nuevas o quedan nulas («sin ubicación»).
+    // coordenadas válidas. PBI-01.1: una ubicación fijada en el mapa manda.
     const { data: actual } = await supabase.from('clientes').select('direccion').eq('id', id).single();
     const nuevaDireccion = data.direccion || null;
-    const cambioDireccion = (actual?.direccion ?? null) !== nuevaDireccion;
-    const coords = cambioDireccion ? await geocodificarDireccion(nuevaDireccion) : null;
+    const ubicacion = await resolverCoordenadas({
+        manual: data.ubicacion_manual,
+        cambioDireccion: (actual?.direccion ?? null) !== nuevaDireccion,
+        direccion: nuevaDireccion,
+        geocodificar: geocodificarDireccion,
+    });
+    if (!ubicacion.ok) return { success: false, error: ubicacion.error };
+    const { coords, cambia } = ubicacion;
 
     const { error } = await supabase
         .from('clientes')
@@ -117,7 +137,7 @@ export async function actualizarCliente(
             telefono: data.telefono || null,
             email: data.email || null,
             direccion: nuevaDireccion,
-            ...(cambioDireccion ? { lat: coords?.lat ?? null, lng: coords?.lng ?? null } : {}),
+            ...(cambia ? { lat: coords?.lat ?? null, lng: coords?.lng ?? null } : {}),
             ventana_inicio: data.ventana_inicio || null,
             ventana_fin: data.ventana_fin || null,
             activo: data.activo,
@@ -203,7 +223,7 @@ export interface HistorialClienteResult {
 export async function obtenerHistorialPedidos(
     clienteId: number
 ): Promise<HistorialClienteResult> {
-    const { error: authError } = await requireAuth();
+    const { error: authError } = await requireAuth(ROL_MINIMO_OFICINA);
     if (authError) return { success: false, pedidos: [], total_ventas: 0, pedidos_activos: 0, error: authError };
 
     const cookieStore = await cookies();

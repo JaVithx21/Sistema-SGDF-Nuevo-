@@ -27,6 +27,9 @@ export default async function ClientesPage() {
         ventana_inicio: c.ventana_inicio ?? null,
         ventana_fin: c.ventana_fin ?? null,
         con_ubicacion: c.lat !== null && c.lng !== null,
+        // PBI-01.1: punto de partida del marcador en el mapa del modal
+        lat: c.lat !== null ? Number(c.lat) : null,
+        lng: c.lng !== null ? Number(c.lng) : null,
         saldo_pendiente: Number(c.saldo_pendiente),
         activo: c.activo,
         total_pedidos: Array.isArray(c.pedidos) ? c.pedidos.length : 0,
