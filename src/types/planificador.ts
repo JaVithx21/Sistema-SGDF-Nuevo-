@@ -87,6 +87,10 @@ export interface ParadaGuardada {
     motivoFallo: string | null;
     /** Momento en que el chofer marcó la parada (timestamptz ISO). */
     marcadaEn: string | null;
+    /** Cobro registrado al entregar (pagos.parada_id, PBI-11.2); null = sin cobro. */
+    cobro: { monto: number; metodo: 'efectivo' | 'transferencia'; referencia: string | null } | null;
+    /** Saldo actual del pedido, después de los cobros. */
+    saldoPendiente: number;
 }
 
 export interface RutaGuardada {
@@ -99,4 +103,6 @@ export interface RutaGuardada {
     geojsonRuta: Record<string, unknown> | null;
     deposito: { nombre: string; lat: number; lng: number } | null;
     paradas: ParadaGuardada[];
+    /** PBI-11.2 / H-04: lo que el jefe cuadra sin llamar al chofer. */
+    resumenCobros: { efectivo: number; transferencia: number; pendiente: number; cobrosRegistrados: number };
 }

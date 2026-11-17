@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 import { PlanificadorRutas } from '@/components/rutas/PlanificadorRutas';
 import { esFechaIso, hoyEnChile } from '@/lib/rutas/fecha';
+import { calcularResumenCobros } from '@/lib/rutas/resumen-cobros';
 import type {
     ChoferPlanificable,
     ParadaGuardada,
@@ -51,11 +52,27 @@ export default async function RutasPage(props: {
         supabase
             .from('rutas_diarias')
             .select(
-                'id, estado, km_planificados, simulada, geojson_ruta, created_at, choferes(nombre_completo), vehiculos(patente), sucursales(nombre, lat, lng), ruta_paradas(orden, estado, motivo_fallo, entregado_at, pedido_id, lat_destino, lng_destino, pedidos(clientes(razon_social)))'
+                'id, estado, km_planificados, simulada, geojson_ruta, created_at, choferes(nombre_completo), vehiculos(patente), sucursales(nombre, lat, lng), ruta_paradas(id, orden, estado, motivo_fallo, entregado_at, pedido_id, lat_destino, lng_destino, pedidos(saldo, clientes(razon_social)))'
             )
             .eq('fecha', fecha)
             .order('created_at', { ascending: false }),
     ]);
+
+    // PBI-11.2: cobros registrados por el chofer en las paradas de estas rutas
+    const paradaIds = (rutasRes.data ?? []).flatMap((r: any) => ((r.ruta_paradas ?? []) as any[]).map((rp) => Number(rp.id)));
+    const pagosRes = paradaIds.length > 0
+        ? await supabase.from('pagos').select('parada_id, monto, metodo_pago, referencia').in('parada_id', paradaIds)
+        : { data: [] };
+    const cobroPorParada = new Map(
+        (pagosRes.data ?? []).map((p: any) => [
+            Number(p.parada_id),
+            {
+                monto: aNumero(p.monto) ?? 0,
+                metodo: p.metodo_pago === 'transferencia' ? 'transferencia' : 'efectivo',
+                referencia: p.referencia ?? null,
+            } as const,
+        ])
+    );
 
     const yaEnRuta = new Set((enRutaRes.data ?? []).map((r: any) => Number(r.pedido_id)));
 
@@ -134,6 +151,8 @@ export default async function RutasPage(props: {
                 estado: ['entregado', 'fallido'].includes(rp.estado) ? rp.estado : 'pendiente',
                 motivoFallo: rp.motivo_fallo ?? null,
                 marcadaEn: rp.entregado_at ?? null,
+                cobro: cobroPorParada.get(Number(rp.id)) ?? null,
+                saldoPendiente: Math.max(aNumero(uno(rp.pedidos)?.saldo) ?? 0, 0),
             }))
             .sort((a, b) => a.orden - b.orden);
         return {
@@ -146,6 +165,7 @@ export default async function RutasPage(props: {
             geojsonRuta: r.geojson_ruta && typeof r.geojson_ruta.type === 'string' ? r.geojson_ruta : null,
             deposito: suc && depLat !== null && depLng !== null ? { nombre: String(suc.nombre), lat: depLat, lng: depLng } : null,
             paradas,
+            resumenCobros: calcularResumenCobros(paradas),
         };
     });
     /* eslint-enable @typescript-eslint/no-explicit-any */
