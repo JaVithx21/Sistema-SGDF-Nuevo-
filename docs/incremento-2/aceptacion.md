@@ -26,7 +26,7 @@ Cada criterio tiene una prueba automatizada que lo verifica en el CI. Las prueba
 | RNF-INT-01 | Pedidos tras cobros de oficina y de terreno | total_pagado = suma de pagos, saldo ≥ 0 | `cobro.db.test.ts` (en CI) · `npm run humo` |
 | RNF-INT-02 | Falla una parada a mitad del guardado | 0 rutas y 0 paradas a medias | `guardar-ruta.db.test.ts` (en CI) |
 | RNF-SEG-02 | Chofer y anon contra tablas y funciones | 0 filas ajenas y 0 ejecuciones | `permisos.db.test.ts` (en CI) |
-| RNF-PERF-03 | Registrar entrega con cobro contra Supabase, 20 repeticiones | p95 ≤ 2 s | ✅ Mediana 191 ms · p95 206 ms · máx. 209 ms (17-11-2026, `npm run humo` → `humo-supabase.json`) |
+| RNF-PERF-03 | Registrar entrega con cobro contra Supabase, 20 repeticiones | p95 ≤ 2 s | ✅ Mediana 197 ms · p95 206 ms · máx. 213 ms (17-11-2026, `npm run humo` → `humo-supabase.json`) |
 
 **Prueba de humo contra Supabase (17-11-2026):** 17/17 verificaciones correctas, con los roles reales sobre la base del proyecto: permisos de anon y del chofer, `mi_ruta_hoy` (17 columnas, sin datos prohibidos), rechazos del cobro, entrega con cobro en 20 paradas, doble envío, cuadratura del jefe ($400.000 cobrados = $400.000 registrados) y `guardar_ruta`. Resultado en [`humo-supabase.json`](humo-supabase.json).
 

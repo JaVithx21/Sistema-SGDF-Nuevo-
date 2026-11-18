@@ -27,7 +27,7 @@ Al marcar **Entregado**, el chofer registra el cobro: efectivo, transferencia co
 
 | Observación | Resolución | Evidencia |
 |---|---|---|
-| C2 · Ciclo hipótesis–medición–decisión sin cerrar | Ensayo de jornada con medición de SE-01, SE-03, SE-04 y SE-05 | Video de la demostración · validación del ensayo |
+| C2 · Ciclo hipótesis–medición–decisión sin cerrar | Ensayo de jornada con medición de SE-01, SE-03, SE-04 y SE-05 | [validacion.md](validacion.md) · video de la demostración |
 | C8 · `guardarRuta()` no revalida y no es atómico | Firma del cálculo (DEF-14) y `guardar_ruta()` transaccional (DEF-15) | PR #16, #18 y #20 · [ADR-04](../adr/ADR-04-frontera-confianza-guardado.md) |
 | C9 · AC-01-límite parcial; guardado manipulado sin AC | Prueba de AC-01-límite y nuevo AC-02-guardado | `coordenadas.test.ts` · `guardar-ruta.test.ts` |
 | C10 · Faltan pruebas de manipulación, atomicidad y contra Supabase | Prueba de la acción completa, PGlite de fallo a mitad y prueba de humo contra Supabase | `guardar-ruta.test.ts` · `guardar-ruta.db.test.ts` · `npm run humo` |
@@ -40,6 +40,7 @@ Al marcar **Entregado**, el chofer registra el cobro: efectivo, transferencia co
 |---|---|
 | [aceptacion.md](aceptacion.md) | Resultado de cada AC y RNF con su prueba |
 | [defectos.md](defectos.md) | DEF-09 a DEF-15, riesgos y limitaciones |
+| [validacion.md](validacion.md) | Ensayo de jornada: resultados de SE-01, SE-03, SE-04, SE-05 y RNF-PERF-02, con su decisión |
 | [ADR-03](../adr/ADR-03-cobro-en-terreno.md) | Cobro registrado junto con la entrega |
 | [ADR-04](../adr/ADR-04-frontera-confianza-guardado.md) | Frontera de confianza del guardado de rutas |
 | `humo-supabase.json` | Resultado de la prueba de humo contra Supabase y de RNF-PERF-03 (`npm run humo`) |
@@ -76,3 +77,5 @@ Todos integrados con la revisión formal (**Approve**) del otro integrante y el 
 | #19 | Javier | Martín | Cobro en Mi ruta (PBI-11.1) |
 | #20 | Javier | Martín | `guardarRuta()` usa `guardar_ruta()` (DEF-15) |
 | #21 | Javier | Martín | Resumen de cobros para el jefe (PBI-11.2) |
+| #22 | Javier | Martín | Documentación del Incremento 2, ADR-03, ADR-04 y prueba de humo contra Supabase |
+| #23 | Javier | Martín | Validación del ensayo de jornada (SE-01, SE-03, SE-04, SE-05, RNF-PERF-02) |
